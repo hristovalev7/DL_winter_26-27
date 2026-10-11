@@ -12,6 +12,12 @@ class TestMain(unittest.TestCase):
 
 
 class TestParseCommandLineArguments(unittest.TestCase):
+    def setUp(self) -> None:
+        self.original_argv_value = sys.argv
+
+    def tearDown(self) -> None:
+        sys.argv = self.original_argv_value
+
     def test_when_no_args_then_returns_one_one(self):
         sys.argv = ["run.py"]
         expected = (1, 1)
