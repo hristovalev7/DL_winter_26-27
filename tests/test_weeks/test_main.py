@@ -45,3 +45,19 @@ class TestParseCommandLineArguments(unittest.TestCase):
         actual = main.parse_command_line_arguments()
 
         self.assertEqual(actual, expected)
+
+    def test_when_week_and_task_given_then_return_the_week_and_the_task(self):
+        expected_week = 7
+        expected_task = 5
+        sys.argv = [
+            "run.py",
+            "--week",
+            str(expected_week),
+            "--task",
+            str(expected_task),
+        ]
+        expected = (expected_week, expected_task)
+
+        actual = main.parse_command_line_arguments()
+
+        self.assertEqual(actual, expected)
