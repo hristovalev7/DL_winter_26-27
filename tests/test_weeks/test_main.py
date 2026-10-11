@@ -28,8 +28,9 @@ class TestParseCommandLineArguments(unittest.TestCase):
 
     def test_when_only_weeks_given_then_returns_the_week_and_one(self):
         expected_week = 5
+        expected_task = 1
         sys.argv = ["run.py", "-w", str(expected_week)]
-        expected = (expected_week, 1)
+        expected = (expected_week, expected_task)
 
         actual = main.parse_command_line_arguments()
 
