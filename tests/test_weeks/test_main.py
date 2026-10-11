@@ -26,7 +26,7 @@ class TestParseCommandLineArguments(unittest.TestCase):
 
         self.assertEqual(actual, expected)
 
-    def test_when_only_weeks_given_then_returns_the_week_and_one(self):
+    def test_when_only_week_given_then_returns_the_week_and_one(self):
         expected_week = 5
         expected_task = 1
         sys.argv = ["run.py", "-w", str(expected_week)]
