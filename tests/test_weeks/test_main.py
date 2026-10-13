@@ -1,14 +1,34 @@
 import sys
 import unittest
 
+import pytest
+
 from weeks import main
 
 
 class TestMain(unittest.TestCase):
+    def setUp(self) -> None:
+        self.original_argv_value = sys.argv
+
+    def tearDown(self) -> None:
+        sys.argv = self.original_argv_value
+
+    @pytest.fixture(autouse=True)
+    def inject_fixtures(self, capsys):
+        self.capsys = capsys
+
     def test_when_main_called_then_always_returns_zero(self):
+        sys.argv = ["run.py"]
         expected = 0
         actual = main.main()
         self.assertEqual(actual, expected)
+
+    def test_when_no_arguments_given_then_task_one_from_week_one_is_run(self):
+        sys.argv = ["run.py"]
+        expected = "Running task 1 from week 1."
+        main.main()
+        actual = self.capsys.readouterr().out
+        self.assertIn(expected, actual)
 
 
 class TestParseCommandLineArguments(unittest.TestCase):
