@@ -4,7 +4,10 @@ import importlib
 
 def main() -> int:
     (week, task) = parse_command_line_arguments()
-    task_lib = importlib.import_module(f"weeks.week{week:02d}.task{task:02d}")
+    try:
+        task_lib = importlib.import_module(f"weeks.week{week:02d}.task{task:02d}")
+    except ModuleNotFoundError:
+        raise ValueError(f"Task {task:02d} does not exist in week {week:02d}!")
     return task_lib.main()
 
 

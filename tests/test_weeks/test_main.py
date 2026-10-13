@@ -30,6 +30,16 @@ class TestMain(unittest.TestCase):
         actual = self.capsys.readouterr().out
         self.assertIn(expected, actual)
 
+    def test_when_invalid_week_or_task_given_then_throws_value_error(self):
+        week = 100
+        task = 1
+        sys.argv = ["run.py", "-w", str(week), "-t", str(task)]
+        with pytest.raises(ValueError) as e:
+            main.main()
+        actual_text = str(e.value)
+        expected_text = f"Task {task:02d} does not exist in week {week:02d}!"
+        self.assertIn(expected_text, actual_text)
+
 
 class TestParseCommandLineArguments(unittest.TestCase):
     def setUp(self) -> None:
