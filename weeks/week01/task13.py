@@ -8,13 +8,19 @@ def main():
     normal_distribution = rng.normal(0, 1, 10000)
     exponential_distribution = rng.exponential(1, 1000)
     print("Uniform distribution")
-    print(f"mean={np.mean(uniform_distribution)}, std={np.std(uniform_distribution)}, min={np.min(uniform_distribution)}, max={np.max(uniform_distribution)}")
+    print(
+        f"mean={np.mean(uniform_distribution)}, std={np.std(uniform_distribution)}, min={np.min(uniform_distribution)}, max={np.max(uniform_distribution)}"
+    )
     print()
     print("Normal distribution")
-    print(f"mean={np.mean(normal_distribution)}, std={np.std(normal_distribution)}, min={np.min(normal_distribution)}, max={np.max(normal_distribution)}")
+    print(
+        f"mean={np.mean(normal_distribution)}, std={np.std(normal_distribution)}, min={np.min(normal_distribution)}, max={np.max(normal_distribution)}"
+    )
     print()
     print("Exponential distribution")
-    print(f"mean={np.mean(exponential_distribution)}, std={np.std(exponential_distribution)}, min={np.min(exponential_distribution)}, max={np.max(exponential_distribution)}")
+    print(
+        f"mean={np.mean(exponential_distribution)}, std={np.std(exponential_distribution)}, min={np.min(exponential_distribution)}, max={np.max(exponential_distribution)}"
+    )
     (_figure, (ax1, ax2, ax3)) = plt.subplots(1, 3)
     ax1.set_title("Uniform")
     ax1.set_ylabel("count")
