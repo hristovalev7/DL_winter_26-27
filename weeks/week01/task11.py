@@ -11,7 +11,7 @@ def main():
     rng_vector = rng.normal(0, 1, points)
 
     y_vector = y_vector + rng_vector
-    (figure, axis) = plt.subplots()
+    (_figure, axis) = plt.subplots()
     axis.scatter(x_vector, y_vector)
     axis.set_title("Points")
     axis.set_xlabel("x")

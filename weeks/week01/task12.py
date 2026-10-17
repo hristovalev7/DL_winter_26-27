@@ -7,7 +7,7 @@ def main():
     x_axis = np.linspace(0, 2 * np.pi, num_of_points)
     sin_y_axis = np.sin(x_axis)
     cos_y_axis = np.cos(x_axis)
-    (figure, axes) = plt.subplots(1, 2)
+    (_figure, axes) = plt.subplots(1, 2)
     axes[0].plot(x_axis, sin_y_axis)
     axes[0].plot(x_axis, cos_y_axis)
 

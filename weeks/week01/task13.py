@@ -15,7 +15,7 @@ def main():
     print()
     print("Exponential distribution")
     print(f"mean={np.mean(exponential_distribution)}, std={np.std(exponential_distribution)}, min={np.min(exponential_distribution)}, max={np.max(exponential_distribution)}")
-    (figure, (ax1, ax2, ax3)) = plt.subplots(1, 3)
+    (_figure, (ax1, ax2, ax3)) = plt.subplots(1, 3)
     ax1.set_title("Uniform")
     ax1.set_ylabel("count")
     ax1.set_xlabel("value")
