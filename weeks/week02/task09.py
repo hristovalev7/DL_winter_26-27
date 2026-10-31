@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from dl_lib.metrics.functional import precision, recall, apply_threshold
+from dl_lib.metrics.functional import apply_threshold, precision, recall
 
 
 def main():
