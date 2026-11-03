@@ -86,9 +86,7 @@ class TestSigmoidDerivative(unittest.TestCase):
         np.testing.assert_allclose(actual, expected, atol=1e-6)
 
 
-
 class TestRelu(unittest.TestCase):
-
     def test_when_input_is_negative_then_returns_zero(self):
         # Arrange
         x = np.array([-5.0, -1.0])
@@ -123,7 +121,6 @@ class TestRelu(unittest.TestCase):
 
 
 class TestTanh(unittest.TestCase):
-
     def test_when_input_is_zero_then_returns_zero(self):
         # Arrange
         x = np.array([0.0])
