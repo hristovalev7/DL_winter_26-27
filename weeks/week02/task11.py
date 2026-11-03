@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from dl_lib.activations.functional import sigmoid, relu, tanh
+from dl_lib.activations.functional import relu, sigmoid, tanh
 
 
 def main():
@@ -14,9 +14,15 @@ def main():
     sigmoid_outputs = sigmoid(activations_inputs)
     relu_outputs = relu(activations_inputs)
     tanh_outputs = tanh(activations_inputs)
-    print(f"At x=-5: sigmoid={sigmoid_outputs[0]}, relu={relu_outputs[0]}, tanh={tanh_outputs[0]}")
-    print(f"At x=0: sigmoid={sigmoid_outputs[1]}, relu={relu_outputs[1]}, tanh={tanh_outputs[1]}")
-    print(f"At x=5: sigmoid={sigmoid_outputs[2]}, relu={relu_outputs[2]}, tanh={tanh_outputs[2]}")
+    print(
+        f"At x=-5: sigmoid={sigmoid_outputs[0]}, relu={relu_outputs[0]}, tanh={tanh_outputs[0]}"
+    )
+    print(
+        f"At x=0: sigmoid={sigmoid_outputs[1]}, relu={relu_outputs[1]}, tanh={tanh_outputs[1]}"
+    )
+    print(
+        f"At x=5: sigmoid={sigmoid_outputs[2]}, relu={relu_outputs[2]}, tanh={tanh_outputs[2]}"
+    )
     x = np.linspace(-10, 10, 1000)
     plt.plot(x, sigmoid(x), label="sigmoid")
     plt.plot(x, relu(x), label="relu")
