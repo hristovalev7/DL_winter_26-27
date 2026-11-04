@@ -1,4 +1,5 @@
 import unittest
+from json.decoder import NaN
 
 import numpy as np
 import torch
@@ -155,7 +156,6 @@ class TestTanh(unittest.TestCase):
 
 
 class TestSoftmax(unittest.TestCase):
-
     def test_when_called_then_probabilities_sum_to_one(self):
         # Arrange
         x = np.array([1.0, 2.0, 3.0])
@@ -199,3 +199,15 @@ class TestSoftmax(unittest.TestCase):
 
         # Assert
         np.testing.assert_allclose(actual.sum(axis=-1), expected_row_sums)
+
+
+class TestNaiveSoftmax(unittest.TestCase):
+    def test_when_input_is_big_then_returns_nan(self):
+        # Arrange
+        large_scores = np.array([1000.0, 1001.0, 1002.0])
+
+        # Act
+        actual = functional.naive_softmax(large_scores)
+
+        # Assert
+        self.assertTrue(np.isnan(actual).all())
