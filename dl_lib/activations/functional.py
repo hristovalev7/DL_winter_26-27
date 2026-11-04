@@ -20,3 +20,7 @@ def tanh(arr: np.ndarray):
 def softmax(arr: np.ndarray):
     m = np.max(arr, axis=-1, keepdims=True)
     return np.exp(arr - m) / np.sum(np.exp(arr - m), axis=-1, keepdims=True)
+
+
+def naive_softmax(arr: np.ndarray):
+    return np.exp(arr) / np.sum(np.exp(arr), axis=-1)
