@@ -15,3 +15,8 @@ def relu(arr: np.ndarray):
 
 def tanh(arr: np.ndarray):
     return (np.exp(arr) - np.exp(-arr)) / (np.exp(arr) + np.exp(-arr))
+
+
+def softmax(arr: np.ndarray):
+    m = np.max(arr, axis=-1, keepdims=True)
+    return np.exp(arr - m) / np.sum(np.exp(arr - m), axis=-1, keepdims=True)
