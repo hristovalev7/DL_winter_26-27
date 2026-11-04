@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import clip
 
 
 def mae(true_values, predicted_values):
@@ -15,3 +16,9 @@ def mse(true_values, predicted_values):
 
 def rmse(true_values, predicted_values):
     return np.sqrt(mse(true_values, predicted_values))
+
+
+def binary_cross_entropy(true_labels, predicted_labels):
+    epsilon = 1e-7
+    clipped_probabilities = clip(predicted_labels, epsilon, 1 - epsilon)
+    return -(np.mean(true_labels * np.log(clipped_probabilities) + (1 - true_labels) * np.log(1 - clipped_probabilities)))
