@@ -27,4 +27,4 @@ def binary_cross_entropy(true_labels, predicted_labels):
 def categorical_cross_entropy(true_labels, predicted_probabilities):
     epsilon = 1e-7
     clipped_probabilities = clip(predicted_probabilities, epsilon, 1 - epsilon)
-    return -(np.mean(np.log(predicted_probabilities[np.arange(len(true_labels)), true_labels])))
+    return -(np.mean(np.log(clipped_probabilities[np.arange(len(true_labels)), true_labels])))
