@@ -106,7 +106,6 @@ class TestRmse(unittest.TestCase):
 
 
 class TestBinaryCrossEntropy(unittest.TestCase):
-
     def test_when_called_then_matches_hand_calculation(self):
         # Arrange
         y_true = np.array([1.0, 0.0])
@@ -123,8 +122,9 @@ class TestBinaryCrossEntropy(unittest.TestCase):
         # Arrange
         y_true = np.array([1.0, 0.0, 1.0])
         p = np.array([0.9, 0.2, 0.6])
-        expected = torch.nn.functional.binary_cross_entropy(torch.from_numpy(p),
-                                                            torch.from_numpy(y_true)).item()
+        expected = torch.nn.functional.binary_cross_entropy(
+            torch.from_numpy(p), torch.from_numpy(y_true)
+        ).item()
 
         # Act
         actual = functional.binary_cross_entropy(y_true, p)
@@ -145,15 +145,16 @@ class TestBinaryCrossEntropy(unittest.TestCase):
 
 
 class TestCategoricalCrossEntropy(unittest.TestCase):
-
     def test_when_called_then_matches_hand_calculation(self):
         # Arrange
         y_true = np.array([0, 1, 2])
-        probabilities = np.array([
-            [0.7, 0.2, 0.1],
-            [0.1, 0.8, 0.1],
-            [0.2, 0.2, 0.6],
-        ])
+        probabilities = np.array(
+            [
+                [0.7, 0.2, 0.1],
+                [0.1, 0.8, 0.1],
+                [0.2, 0.2, 0.6],
+            ]
+        )
         expected = -np.mean(np.log([0.7, 0.8, 0.6]))
 
         # Act
@@ -165,13 +166,16 @@ class TestCategoricalCrossEntropy(unittest.TestCase):
     def test_when_called_then_matches_torch_nll_loss_on_log_probabilities(self):
         # Arrange
         y_true = np.array([0, 1, 2])
-        probabilities = np.array([
-            [0.7, 0.2, 0.1],
-            [0.1, 0.8, 0.1],
-            [0.2, 0.2, 0.6],
-        ])
-        expected = torch.nn.functional.nll_loss(torch.log(torch.from_numpy(probabilities)),
-                                                torch.from_numpy(y_true)).item()
+        probabilities = np.array(
+            [
+                [0.7, 0.2, 0.1],
+                [0.1, 0.8, 0.1],
+                [0.2, 0.2, 0.6],
+            ]
+        )
+        expected = torch.nn.functional.nll_loss(
+            torch.log(torch.from_numpy(probabilities)), torch.from_numpy(y_true)
+        ).item()
 
         # Act
         actual = functional.categorical_cross_entropy(y_true, probabilities)
@@ -185,9 +189,11 @@ class TestCategoricalCrossEntropy(unittest.TestCase):
 
         # Act
         confidently_right = functional.categorical_cross_entropy(
-            y_true, np.array([[0.999, 0.0005, 0.0005]]))
+            y_true, np.array([[0.999, 0.0005, 0.0005]])
+        )
         confidently_wrong = functional.categorical_cross_entropy(
-            y_true, np.array([[0.001, 0.4995, 0.4995]]))
+            y_true, np.array([[0.001, 0.4995, 0.4995]])
+        )
 
         # Assert
         self.assertGreater(confidently_wrong, confidently_right)
