@@ -22,3 +22,7 @@ def numerical_gradient(loss, parameters: np.ndarray) -> np.ndarray:
         minus.flat[i] = minus.flat[i] - epsilon
         gradient.flat[i] = (loss(plus) - loss(minus)) / (2 * epsilon)
     return gradient
+
+
+def gradient_descent_step(parameters: np.ndarray, gradient: np.ndarray, rate: float) -> np.ndarray:
+    return parameters - rate * gradient
