@@ -6,7 +6,7 @@ def initialize_weights(low, high, size, seed=0):
     return rng.uniform(low, high, size)
 
 
-def forward(x, weights, bias=0., activation=None):
+def forward(x, weights, bias=0.0, activation=None):
     if activation is None:
         return x @ weights + bias
     return activation(x @ weights + bias)
