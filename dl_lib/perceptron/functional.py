@@ -24,5 +24,7 @@ def numerical_gradient(loss, parameters: np.ndarray) -> np.ndarray:
     return gradient
 
 
-def gradient_descent_step(parameters: np.ndarray, gradient: np.ndarray, rate: float) -> np.ndarray:
+def gradient_descent_step(
+    parameters: np.ndarray, gradient: np.ndarray, rate: float
+) -> np.ndarray:
     return parameters - rate * gradient
