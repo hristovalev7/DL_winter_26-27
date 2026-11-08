@@ -7,6 +7,6 @@ def initialize_weights(low, high, size, seed=0):
 
 
 def forward(x, weights, bias=0.0, activation=None):
-    if activation is None:
-        return x @ weights + bias
-    return activation(x @ weights + bias)
+    if activation is not None:
+        return activation(x @ weights + bias)
+    return x @ weights + bias
