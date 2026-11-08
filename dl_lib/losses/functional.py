@@ -8,7 +8,7 @@ def mae(true_values, predicted_values):
 
 
 def mse(true_values, predicted_values):
-    errors = (true_values - predicted_values)
+    errors = true_values - predicted_values
     return np.mean(errors * errors.T)
 
 
