@@ -8,10 +8,8 @@ def mae(true_values, predicted_values):
 
 
 def mse(true_values, predicted_values):
-    squared_errors_sum = (true_values - predicted_values) @ (
-        true_values - predicted_values
-    )
-    return squared_errors_sum / len(predicted_values)
+    errors = (true_values - predicted_values)
+    return np.mean(errors * errors.T)
 
 
 def rmse(true_values, predicted_values):
