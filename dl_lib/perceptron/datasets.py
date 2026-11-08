@@ -7,4 +7,3 @@ def create_dataset(n):
     for i in x:
         dataset.append((i, i * 2))
     return dataset
-
