@@ -30,3 +30,11 @@ def gradient_descent_step(
     parameters: np.ndarray, gradient: np.ndarray, rate: float
 ) -> np.ndarray:
     return parameters - rate * gradient
+
+
+def analytical_gradient(dataset, weights, bias=0., activation=None):
+    x = np.array([pair[0] for pair in dataset])
+    y = np.array([pair[1] for pair in dataset])
+    predictions = forward(x, weights, bias, activation)
+    errors = (predictions - y).reshape(-1, 1)
+    return 2 * np.mean(x * errors), 2 * np.mean(errors)
