@@ -32,7 +32,7 @@ def gradient_descent_step(
     return parameters - rate * gradient
 
 
-def analytical_gradient(dataset, weights, bias=0., activation=None):
+def analytical_gradient(dataset, weights, bias=0.0, activation=None):
     x = np.array([pair[0] for pair in dataset])
     y = np.array([pair[1] for pair in dataset])
     predictions = forward(x, weights, bias, activation)

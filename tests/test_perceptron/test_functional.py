@@ -228,6 +228,7 @@ class TestAnalyticalGradient(unittest.TestCase):
         np.testing.assert_allclose(actual_weight_gradient, expected_weight_gradient)
         self.assertAlmostEqual(actual_bias_gradient, expected_bias_gradient)
 
+
 # def test_when_activation_given_then_matches_the_numerical_gradient(self):
 #     # Arrange
 #     dataset = [
