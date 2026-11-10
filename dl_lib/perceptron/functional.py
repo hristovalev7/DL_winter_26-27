@@ -10,8 +10,8 @@ def forward(
         x: np.ndarray, weights: np.ndarray, bias=0.0, activation=None
 ) -> np.ndarray:
     if activation is not None:
-        return activation(np.sum(x * weights) + bias)
-    return np.sum(x * weights) + bias
+        return activation(np.sum(x * weights, axis=-1) + bias)
+    return np.sum(x * weights, axis=-1) + bias
 
 
 def numerical_gradient(loss_function, parameters: np.ndarray) -> np.ndarray:
