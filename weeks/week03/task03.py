@@ -12,16 +12,15 @@ from dl_lib.perceptron.functional import (
 
 def loss_function(weights: np.ndarray) -> np.ndarray:
     dataset = np.array(create_dataset(6))
-    inputs = dataset[:, 0]
-    inputs_column = inputs.reshape(-1, 1)
+    x = dataset[:, 0].reshape(-1, 1)
     true_values = dataset[:, 1]
-    predicted_values = forward(inputs_column, weights)
+    predicted_values = forward(x, weights)
     return mse(true_values, predicted_values)
 
 
 def main():
     weights = initialize_weights(0, 10, 1, 42)
-    learning_rate = 0.02867
+    learning_rate = 0.02867761
     loss = loss_function(weights)
     gradient = numerical_gradient(loss_function, weights)
     print(f"Loss before update: {loss}")
