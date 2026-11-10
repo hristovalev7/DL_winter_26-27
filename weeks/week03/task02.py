@@ -6,14 +6,12 @@ from dl_lib.perceptron.functional import forward, initialize_weights
 
 
 def main():
-    dataset_list = create_dataset(6)
-    dataset_array = np.array(dataset_list)
-    x = dataset_array[:, 0]
-    y = dataset_array[:, 1]
-    x_column = x.reshape(-1, 1)
+    dataset = create_dataset(6)
+    x = np.array([pair[0] for pair in dataset]).reshape(-1, 1)
+    y = np.array([pair[1] for pair in dataset])
     weight = initialize_weights(0, 10, 1, 42)
-    predictions = forward(x_column, weight)
-    print(f"Dataset: {dataset_list}")
+    predictions = forward(x, weight)
+    print(f"Dataset: {dataset}")
     print(f"w: {weight[0]}")
     print(f"MSE: {mse(y, predictions)}")
     print("Perturbing w:")
@@ -21,5 +19,5 @@ def main():
     for e in epsilons:
         if np.isclose(e, 0, 1e-7):
             continue
-        predictions = forward(x_column, weight + e)
+        predictions = forward(x, weight + e)
         print(f"w + ({e}) -> w={weight[0] + e}, MSE={mse(y, predictions)}")
