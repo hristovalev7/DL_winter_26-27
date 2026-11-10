@@ -2,7 +2,12 @@ import numpy as np
 
 from dl_lib.losses.functional import mse
 from dl_lib.perceptron.datasets import create_dataset
-from dl_lib.perceptron.functional import forward, initialize_weights, analytical_gradient, numerical_gradient
+from dl_lib.perceptron.functional import (
+    analytical_gradient,
+    forward,
+    initialize_weights,
+    numerical_gradient,
+)
 
 
 def loss_function(weights: np.ndarray) -> np.ndarray:
