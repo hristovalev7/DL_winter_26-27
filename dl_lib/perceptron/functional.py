@@ -7,11 +7,11 @@ def initialize_weights(low, high, size, seed=0) -> np.ndarray:
 
 
 def forward(
-    x: np.ndarray, weights: np.ndarray, bias=0.0, activation=None
+        x: np.ndarray, weights: np.ndarray, bias=0.0, activation=None
 ) -> np.ndarray:
     if activation is not None:
-        return activation(x @ weights + bias)
-    return x @ weights + bias
+        return np.sum(activation(x * weights)) + bias
+    return np.sum(x * weights) + bias
 
 
 def numerical_gradient(loss_function, parameters: np.ndarray) -> np.ndarray:
@@ -27,7 +27,7 @@ def numerical_gradient(loss_function, parameters: np.ndarray) -> np.ndarray:
 
 
 def gradient_descent_step(
-    parameters: np.ndarray, gradient: np.ndarray, rate: float
+        parameters: np.ndarray, gradient: np.ndarray, rate: float
 ) -> np.ndarray:
     return parameters - rate * gradient
 
