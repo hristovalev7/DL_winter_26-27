@@ -23,7 +23,9 @@ def main():
 
         y_pred = forward(x, weights)
         current_loss = mse(y_true, y_pred)
-    print(f"After 500 epochs: w={weights[0]:.6f}, loss={current_loss:.6f} (target: w=2.0)")
+    print(
+        f"After 500 epochs: w={weights[0]:.6f}, loss={current_loss:.6f} (target: w=2.0)"
+    )
 
     print()
 
@@ -37,4 +39,6 @@ def main():
 
         y_pred = forward(x, weights)
         current_loss = mse(y_true, y_pred)
-    print(f"After 500 epochs: w={weights[0]:.6f}, loss={current_loss:.6f} (target: w=2.0)")
+    print(
+        f"After 500 epochs: w={weights[0]:.6f}, loss={current_loss:.6f} (target: w=2.0)"
+    )
