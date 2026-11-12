@@ -12,7 +12,7 @@ from dl_lib.perceptron.functional import (
 
 def loss_function(weights: np.ndarray) -> np.ndarray:
     dataset = np.array(create_dataset(6))
-    x = dataset[:, 0]
+    x = dataset[:, 0].reshape(-1, 1)
     true_values = dataset[:, 1]
     predicted_values = forward(x, weights)
     return mse(true_values, predicted_values)
