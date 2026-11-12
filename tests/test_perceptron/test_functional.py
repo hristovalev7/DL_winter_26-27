@@ -56,7 +56,9 @@ class TestForward(unittest.TestCase):
         expected = 0.5
 
         # Act
-        actual = functional.forward(x, weights, bias=bias, activation=lambda z: 1.0 / (1.0 + np.exp(-z)))
+        actual = functional.forward(
+            x, weights, bias=bias, activation=lambda z: 1.0 / (1.0 + np.exp(-z))
+        )
 
         # Assert
         self.assertAlmostEqual(actual, expected)
