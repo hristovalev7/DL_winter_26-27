@@ -78,6 +78,47 @@
       - [Task 12](#task-12-3)
       - [Task 13](#task-13-3)
       - [Task 14](#task-14-2)
+  - [Week 05 - Multilayer Perceptrons](#week-05---multilayer-perceptrons)
+    - [Task 01](#task-01-4)
+    - [Task 02](#task-02-4)
+    - [Task 03](#task-03-4)
+    - [Task 04](#task-04-4)
+    - [Task 05](#task-05-4)
+    - [Task 06](#task-06-4)
+    - [Task 07](#task-07-4)
+    - [Task 08](#task-08-4)
+    - [Task 09](#task-09-4)
+    - [Task 10](#task-10-4)
+    - [Task 11](#task-11-4)
+    - [Task 12](#task-12-4)
+    - [Task 13](#task-13-4)
+    - [Task 14](#task-14-3)
+    - [Task 15](#task-15-1)
+  - [Week 06 - Optimizers](#week-06---optimizers)
+    - [Stochastic gradient descent (SGD)](#stochastic-gradient-descent-sgd)
+      - [Task 01](#task-01-5)
+      - [Task 02](#task-02-5)
+      - [Task 03](#task-03-5)
+      - [Task 04](#task-04-5)
+      - [Task 05](#task-05-5)
+    - [Adaptive gradients](#adaptive-gradients)
+      - [Task 06](#task-06-5)
+      - [Task 07](#task-07-5)
+      - [Task 08](#task-08-5)
+      - [Task 09](#task-09-5)
+    - [Comparing the five optimizers](#comparing-the-five-optimizers)
+      - [Task 10](#task-10-5)
+    - [Update rules](#update-rules)
+  - [Week 07 - Regularization and Normalization](#week-07---regularization-and-normalization)
+    - [Task 01](#task-01-6)
+    - [Task 02](#task-02-6)
+    - [Task 03](#task-03-6)
+    - [Task 04](#task-04-6)
+    - [Task 05](#task-05-6)
+    - [Task 06](#task-06-6)
+    - [Task 07](#task-07-6)
+    - [Task 08](#task-08-6)
+    - [Task 09](#task-09-6)
 
 ## Week 01 - Introduction to NumPy, Matplotlib and PyTorch
 
@@ -5234,3 +5275,2299 @@ o (built-in tanh) = Value(data=0.7071067811865476)
 x1.grad (built-in tanh) = -1.4999999999999996
 w1.grad (built-in tanh) = 0.9999999999999998
 ```
+
+## Week 05 - Multilayer Perceptrons
+
+### Task 01
+
+Consider a two-input neural network with one hidden layer containing one neuron with a ReLU activation. The output layer is linear with the goal of doing regression.
+
+Given:
+
+- $x_1 = 1$
+- $x_2 = 2$
+- $w_1 = 0.5$
+- $w_2 = -1$
+- $b_1 = 0$
+- $w_3 = 1$
+- $b_2 = 0$
+
+and $y = 1$:
+
+1. Run the forward pass.
+2. Perform one iteration of stochastic gradient descent.
+3. Compute the new values of the parameters.
+4. What would you do if you saw these gradients in production?
+
+<details>
+<summary>Reveal solution</summary>
+
+Let's draw a high-level overview of the network we're working with:
+
+![w05_recap_11.png](assets/w05_recap_11.png "w05_recap_11.png")
+
+Great - this gives us a feeling of what's happening in the forward pass!
+
+To complete point one we can create the computation graph and calculate the fields `data`:
+
+![w05_recap_12.svg](assets/w05_recap_12.svg "w05_recap_12.svg")
+
+This completes point 1. We have the final output of the network: `0` and the computed loss: `1`.
+
+We use the method shown previously to compute the gradients:
+
+![w05_recap_13.svg](assets/w05_recap_13.svg "w05_recap_13.svg")
+
+This completes point 2.
+
+Since we do not have a learning rate in the description, let's assume it's $\lambda$. We'd then get the following updates:
+
+- $w_1^{new} = 0.5$
+- $w_2^{new} = -1$
+- $b_1^{new} = 0$
+- $w_3^{new} = 1$
+- $b_2^{new} = 0 - \lambda(-2) = 2\lambda$
+
+This completes point 3.
+
+Point 4 directs our attention to the gradient values. Having zero gradients is a big problem - we basically have dead neurons. We can see that this is caused by the scale of the weights and parameters. We could address this by:
+
+1. Having the parameters initialized with small values around `0` - uniform using the number of input features, see [nn.Linear](https://docs.pytorch.org/docs/stable/generated/torch.nn.Linear.html).
+2. Having the inputs normalized between `0` and `1` or standardized with a mean of `0` and a standard deviation of `1`.
+3. We should also keep tracking the gradient so that we can track our progress.
+
+And this is it - the above completes point 4.
+
+</details>
+
+### Task 02
+
+**Description:**
+
+A multilayer perceptron is built out of neurons, and the library has none yet.
+
+Define a class `Neuron` in `dl_lib.engine.mlp`. Given a number of inputs `n_inputs` and an optional seeded generator `rng`, it:
+
+- draws one weight `Value` per input and one bias `Value`, each from a uniform distribution between `-1` and `1` (defaulting to a fresh `random.Random(42)` if no `rng` is given, so it is reproducible without one).
+- on `__call__`, computes the hyperbolic tangent of the weighted sum of the given inputs plus the bias, and returns the result as a single `Value`.
+- exposes a method `parameters`, returning every weight followed by the bias.
+
+Create a script that constructs a neuron with three inputs, prints its weights and bias, and calls it on the inputs `2.0`, `3.0`, `-1.0`.
+
+**Acceptance criteria:**
+
+- A neuron draws one weight per input and a single bias, in that order.
+- Calling a neuron on a list of inputs returns one `Value`: the hyperbolic tangent of the weighted sum plus the bias.
+- `parameters` returns the weights followed by the bias.
+
+**Test cases:** See `tests/test_dl_lib/test_engine/test_mlp.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 2
+```
+
+```text
+neuron.w = [0.2788535969157675, -0.9499784895546661, -0.4499413632617615]
+neuron.b = -0.5535785237023545
+neuron(x) = Value(data=-0.9835404188768979)
+```
+
+### Task 03
+
+**Description:**
+
+A single `Neuron` produces exactly one number; a network needs many of them reading the same inputs.
+
+Define a class `Layer` in `dl_lib.engine.mlp`. Given a number of inputs `n_inputs`, a number of outputs `n_outputs`, and an optional seeded generator `rng` (defaulting the same way, and threaded into every neuron it creates, so the whole layer's weights come from one continuous sequence of draws rather than each neuron restarting the same one), it:
+
+- constructs one neuron per output, each seeing all of the inputs.
+- on `__call__`, calls every neuron on the same input and returns their outputs as a list - always a list, even when there is only one neuron.
+- exposes a method `parameters`, returning every neuron's parameters, concatenated in order.
+
+Create a script that constructs a layer of four neurons over three inputs, calls it on the inputs `2.0`, `3.0`, `-1.0`, and prints the outputs and the neuron count.
+
+**Acceptance criteria:**
+
+- A layer creates one neuron per output, all sharing the same generator.
+- Calling a layer returns a list with one output per neuron, even when there is only one neuron.
+- `parameters` returns every neuron's parameters, concatenated in order.
+
+**Test cases:** See `tests/test_dl_lib/test_engine/test_mlp.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 3
+```
+
+```text
+layer(x) = [-0.9835404188768979, 0.3761781385427304, -0.9881211941388645, -0.9991982278148797]
+Number of neurons: 4
+```
+
+### Task 04
+
+**Description:**
+
+One layer is a single step of computation; depth is what makes a network expressive.
+
+Define a class `MLP` in `dl_lib.engine.mlp`. Given a number of inputs `n_inputs`, a list `n_outputs` holding each layer's output size, and an optional seeded generator `rng` (defaulting and threaded down the same way, through every layer it creates), it:
+
+- builds one layer per requested output size, sizing each layer's input to the previous layer's output, and the first layer's input to `n_inputs`.
+- on `__call__`, feeds the input through every layer in sequence, then collapses a final layer of exactly one neuron down to a bare `Value` rather than a one-element list.
+- exposes a method `parameters`, returning every layer's parameters, concatenated in order.
+
+Create a script that constructs a network over three inputs with two hidden layers of four neurons each and a single output neuron, calls it on the inputs `2.0`, `3.0`, `-1.0`, and prints the collapsed output and the layer count.
+
+**Acceptance criteria:**
+
+- A network builds one layer per requested output size, each sized to match the previous layer's output.
+- Calling a network whose final layer holds one neuron returns a bare `Value`, not a one-element list.
+- Calling a network whose final layer holds several neurons returns a list.
+- `parameters` returns every layer's parameters, concatenated in order.
+
+**Test cases:** See `tests/test_dl_lib/test_engine/test_mlp.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 4
+```
+
+```text
+mlp(x) = Value(data=0.6994093620224068)
+Number of layers: 3
+```
+
+### Task 05
+
+**Description:**
+
+Create a script that constructs a network over three inputs with two hidden layers of four neurons each and a single output neuron, then prints how many parameters it reports in total, along with the first three.
+
+**Acceptance criteria:**
+
+- The script prints the network's total parameter count.
+- The script prints the value held by each of the first three parameters.
+
+**Test cases:** See `tests/test_dl_lib/test_engine/test_mlp.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 5
+```
+
+```text
+Number of parameters: 41
+First three parameters: [0.2788535969157675, -0.9499784895546661, -0.4499413632617615]
+```
+
+### Task 06
+
+**Description:**
+
+Construct a network over three inputs with two hidden layers of four neurons each and a single output neuron, plus a toy dataset of four samples:
+
+| inputs | target |
+| --- | --- |
+| `2.0`, `3.0`, `-1.0` | `1.0` |
+| `3.0`, `-1.0`, `0.5` | `-1.0` |
+| `0.5`, `1.0`, `1.0` | `-1.0` |
+| `1.0`, `1.0`, `-1.0` | `1.0` |
+
+Run every sample through the network and compute the mean squared error loss: the sum, over all four samples, of the squared difference between the prediction and the target. Note that `Value` implements no subtraction, so the difference has to be written as an addition of the negated target.
+
+**Acceptance criteria:**
+
+- The script predicts one output per sample.
+- The script computes and prints the summed squared error over all four samples.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 6
+```
+
+```text
+Predictions: [0.6994093620224068, 0.502629581661551, 0.6931545900944502, 0.8755224728708614]
+MSE loss: 5.230517512042235
+```
+
+### Task 07
+
+**Description:**
+
+Take the same network and four-sample dataset and run 20 epochs at a learning rate of `0.05`. Each epoch: predict every sample, compute the mean squared error, backpropagate it, then nudge every parameter against its own gradient, scaled by the learning rate. Print the loss each epoch, and alongside it the sum of the absolute values of every parameter's gradient.
+
+**Acceptance criteria:**
+
+- Every epoch predicts, computes the loss, backpropagates, and updates every parameter against its gradient.
+- The script prints the loss and the total absolute gradient every epoch.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 7
+```
+
+```text
+epoch 0: loss = 5.230517512042235, sum|grad| = 34.220129865268504
+epoch 1: loss = 2.7046890507642445, sum|grad| = 50.695208354620014
+epoch 2: loss = 2.9924726393773007, sum|grad| = 52.612452853912515
+epoch 3: loss = 0.691642620292373, sum|grad| = 56.48349050871577
+epoch 4: loss = 0.4336539664762626, sum|grad| = 57.57833114644233
+epoch 5: loss = 0.21830440118736802, sum|grad| = 59.80607980031232
+epoch 6: loss = 0.019389294167293656, sum|grad| = 60.14971784558
+epoch 7: loss = 0.0022878054068387367, sum|grad| = 60.18274658248433
+epoch 8: loss = 0.0003795654448862342, sum|grad| = 60.1877236273685
+epoch 9: loss = 7.106617897142327e-05, sum|grad| = 60.18853422221534
+epoch 10: loss = 1.461312374585821e-05, sum|grad| = 60.188665823408435
+epoch 11: loss = 3.3297172627176823e-06, sum|grad| = 60.188686743232836
+epoch 12: loss = 8.430137915314457e-07, sum|grad| = 60.18868976278141
+epoch 13: loss = 2.3569129381387933e-07, sum|grad| = 60.188690025825025
+epoch 14: loss = 7.188755669820813e-08, sum|grad| = 60.188689954595695
+epoch 15: loss = 2.353579396751116e-08, sum|grad| = 60.18868989184172
+epoch 16: loss = 8.118357925684746e-09, sum|grad| = 60.18868986024918
+epoch 17: loss = 2.8961033543749084e-09, sum|grad| = 60.18868984659204
+epoch 18: loss = 1.0521901589172596e-09, sum|grad| = 60.188689841072545
+epoch 19: loss = 3.854305930747228e-10, sum|grad| = 60.18868983891087
+```
+
+The loss collapses to almost zero within a dozen epochs, which looks like a success - but `sum|grad|` tells a different story: it should shrink toward zero right alongside the loss (a near-zero loss means near-zero gradients), yet instead it climbs and then plateaus around `60.19`.
+
+A gradient accumulates rather than overwrites on every backward pass, which is what makes a value reused inside one graph sum its contributions correctly; this loop never resets the gradients back to zero between epochs, so every epoch's gradient is added on top of every previous epoch's.
+
+The loss still happens to decrease on this particular toy problem because the stale, inflated gradient still points in a direction that helps - but the number printed as "the gradient" no longer has anything to do with the current error.
+
+### Task 08
+
+**Description:**
+
+Create a script that fixes the bug.
+
+**Acceptance criteria:**
+
+- Every parameter's gradient is zeroed before each epoch's backward pass.
+- The script prints the loss and the total absolute gradient every epoch.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 8
+```
+
+```text
+epoch 0: loss = 5.230517512042235, sum|grad| = 34.2201298652685
+epoch 1: loss = 2.7046890507642445, sum|grad| = 18.74975816325999
+epoch 2: loss = 1.8460237252314982, sum|grad| = 15.764631738821066
+epoch 3: loss = 1.1774870087919072, sum|grad| = 16.871430528965146
+epoch 4: loss = 0.8217294550832637, sum|grad| = 13.24971182611667
+epoch 5: loss = 0.5957215587693911, sum|grad| = 9.877267078121829
+epoch 6: loss = 0.43115794091632775, sum|grad| = 4.901610361018949
+epoch 7: loss = 0.3468314917603138, sum|grad| = 3.8102077451205383
+epoch 8: loss = 0.28903713992681357, sum|grad| = 3.251459183294917
+epoch 9: loss = 0.24605065583938177, sum|grad| = 2.8263207442955087
+epoch 10: loss = 0.21309389813936697, sum|grad| = 2.491675487126754
+epoch 11: loss = 0.18718814718937848, sum|grad| = 2.2225823174480586
+epoch 12: loss = 0.16638755353165732, sum|grad| = 2.002310777340805
+epoch 13: loss = 0.1493799733703151, sum|grad| = 1.8191838275399463
+epoch 14: loss = 0.13525484661841908, sum|grad| = 1.6648593432876941
+epoch 15: loss = 0.12336389545940171, sum|grad| = 1.5332515941800222
+epoch 16: loss = 0.11323493741060488, sum|grad| = 1.4198348584183966
+epoch 17: loss = 0.10451700918771248, sum|grad| = 1.3211841680618464
+epoch 18: loss = 0.09694449026136834, sum|grad| = 1.2346661268862242
+epoch 19: loss = 0.09031307448189842, sum|grad| = 1.158226617994818
+```
+
+### Task 09
+
+**Description:**
+
+Scalar `Value`s cannot carry a real network - from here on the pieces operate on tensors, in a fresh `dl_lib.nn` package independent of `dl_lib.engine`.
+
+Define an abstract base class `Module` in `dl_lib.nn.module`. It:
+
+- declares an abstract method `forward`, taking a tensor and returning a tensor, for subclasses to implement.
+- makes a module callable like a function, by having the call delegate straight to `forward`.
+- carries a flag `training`, declared on the class itself rather than per instance, and starting out switched on.
+- exposes a method `train`, turning that flag on and returning the module itself, so calls can be chained.
+- exposes a method `eval`, turning that flag off and returning the module itself.
+
+Create a script that defines a small local subclass - ex. one that doubles its input - to demonstrate the base class, and calls it on a tensor.
+
+**Acceptance criteria:**
+
+- The base class cannot be instantiated on its own, because `forward` is abstract.
+- A subclass implementing `forward` can be called directly, and the call returns what `forward` returns.
+- A freshly constructed module reports that it is in training mode.
+- `train` switches a module into training mode and `eval` switches it out, each returning the module itself.
+
+**Test cases:** See `tests/test_dl_lib/test_nn/test_module.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 9
+```
+
+```text
+x = tensor([1., 2., 3.])
+double(x) = tensor([2., 4., 6.])
+```
+
+> [!NOTE]
+> The subclass supplied nothing but `forward`; being callable came from the base class alone.
+
+### Task 10
+
+**Description:**
+
+Define a class `Sigmoid` in `dl_lib.nn.activations`, extending `Module`. Its `forward` returns the logistic sigmoid of the input, applied element by element.
+
+Create a script that applies a sigmoid to a small tensor spanning negative and positive values and prints the result.
+
+**Acceptance criteria:**
+
+- Calling a sigmoid returns the logistic sigmoid of every element of the input.
+
+**Test cases:** See `tests/test_dl_lib/test_nn/test_activations.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 10
+```
+
+```text
+x = tensor([-3., -1.,  0.,  1.,  3.])
+sigmoid(x) = tensor([0.0474, 0.2689, 0.5000, 0.7311, 0.9526])
+```
+
+### Task 11
+
+**Description:**
+
+A sigmoid only ever emits positive numbers, so every layer downstream receives an input that is off-center before it even starts.
+
+Define a **`Tanh`** class in `dl_lib.nn.activations`, extending `Module`. Its `forward` returns the hyperbolic tangent of the input, applied element by element.
+
+Create a script that applies a hyperbolic tangent to a small tensor spanning negative and positive values and prints the result.
+
+**Acceptance criteria:**
+
+- Calling a hyperbolic tangent returns the hyperbolic tangent of every element of the input.
+
+**Test cases:** See `tests/test_dl_lib/test_nn/test_activations.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 11
+```
+
+```text
+x = tensor([-3., -1.,  0.,  1.,  3.])
+tanh(x) = tensor([-0.9951, -0.7616,  0.0000,  0.7616,  0.9951])
+```
+
+### Task 12
+
+**Description:**
+
+Both squashing activations flatten out at their extremes, so a strongly activated neuron receives almost no gradient and learns at a crawl.
+
+Define a **`ReLU`** class in `dl_lib.nn.activations`, extending `Module`. Its `forward` returns the element-wise maximum of the input and zero.
+
+Create a script that applies a rectifier to a small tensor spanning negative, zero, and positive values and prints the result.
+
+**Acceptance criteria:**
+
+- Calling a rectifier zeroes every negative element of the input and leaves the rest unchanged.
+
+**Test cases:** See `tests/test_dl_lib/test_nn/test_activations.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 12
+```
+
+```text
+x = tensor([-2., -1.,  0.,  1.,  2.])
+relu(x) = tensor([0., 0., 0., 1., 2.])
+```
+
+### Task 13
+
+**Description:**
+
+Zeroing negatives also zeroes their gradient, so a neuron pushed into the negative region can stay dead for the rest of training.
+
+Define a **`LeakyReLU`** class in `dl_lib.nn.activations`, extending `Module`. It is constructed with a `negative_slope`, defaulting to one hundredth, and its `forward` passes non-negative elements through untouched while scaling negative ones by that slope.
+
+Create a script that applies a leaky rectifier with a slope of `0.1` to a small tensor spanning negative, zero, and positive values and prints the result.
+
+**Acceptance criteria:**
+
+- Calling a leaky rectifier leaves non-negative elements of the input unchanged and scales negative elements by the configured slope.
+- The slope defaults to one hundredth when none is given.
+
+**Test cases:** See `tests/test_dl_lib/test_nn/test_activations.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 13
+```
+
+```text
+x = tensor([-2., -1.,  0.,  1.,  2.])
+leaky_relu(x) = tensor([-0.2000, -0.1000,  0.0000,  1.0000,  2.0000])
+```
+
+### Task 14
+
+**Description:**
+
+Calling modules one by one by hand does not scale past a couple of them.
+
+Define a **`Sequential`** class in `dl_lib.nn.sequential`, extending `Module`. Constructed from any number of modules, it:
+
+- on `forward`, feeds its input through every module in order and returns the last one's output.
+- exposes methods **`append`**, **`extend`**, and **`insert`**, for growing the chain after construction - one module at the end, many at the end, and one at a given position.
+- overrides **`train`**, switching the chain itself and every module it holds into training mode, recursing into any nested chain, and returning itself.
+- overrides **`eval`**, doing the same in the other direction.
+
+Create a script that chains a rectifier followed by a hyperbolic tangent, calls the chain on a small tensor, and prints the result.
+
+**Acceptance criteria:**
+
+- Calling a chain feeds the input through every module in order and returns the final result.
+- Each of `append`, `extend`, and `insert` grows the chain.
+- Putting a chain into training mode also puts every module it holds into training mode, including those nested inside an inner chain.
+- Putting a chain into evaluation mode does the same in the other direction.
+
+**Test cases:** See `tests/test_dl_lib/test_nn/test_sequential.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 14
+```
+
+```text
+x = tensor([-2.,  2.])
+sequential(x) = tensor([0.0000, 0.9640])
+```
+
+### Task 15
+
+**Description:**
+
+An optimizer needs the tensors it is about to update, but nothing in `dl_lib.nn` can hand that list over.
+
+Add a method **`parameters`** to `Module` in `dl_lib.nn.module`. It takes no arguments and returns an empty list by default, since a plain module such as an activation owns no learnable tensors, and nothing is discovered automatically by reflection. A subclass that does own learnable tensors overrides the method to hand them back explicitly.
+
+Add a **`parameters`** method to `Sequential` in `dl_lib.nn.sequential` as well, overriding the base one. It returns every module's own parameters concatenated, in the order the modules were added, so a chain reports its full parameter list from a single call however deep it runs.
+
+Create a script that defines a small local affine module - a weight matrix and a bias vector, overriding `parameters` to return both - then chains two of them with a rectifier in between, asks the chain for its parameters, and prints how many tensors came back along with each one's shape.
+
+**Acceptance criteria:**
+
+- A plain module reports no parameters.
+- A chain reports every module's own parameters, concatenated in the order the modules were added.
+- A chain nested inside another chain still has its parameters collected.
+
+**Test cases:** See `tests/test_dl_lib/test_nn/test_module.py` and `tests/test_dl_lib/test_nn/test_sequential.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 5 -t 15
+```
+
+```text
+number of learnable tensors = 4
+params[0].shape = (3, 4)
+params[1].shape = (4,)
+params[2].shape = (4, 2)
+params[3].shape = (2,)
+```
+
+## Week 06 - Optimizers
+
+<details>
+
+<summary>What is an optimizer?</summary>
+
+The functionality that performs parameter updates.
+
+</details>
+
+<details>
+
+<summary>In which part of the model creation are optimizers used?</summary>
+
+They are used inside the training loop, all in the same manner:
+
+```python
+from torch import 
+
+optimizer = optim.SGD(model.parameters(), lr=0.001)
+
+<... start trainig loop ...>
+
+optimizer.zero_grad() # make the current gradients 0
+loss.backward()       # calculate the new gradients
+optimizer.step()      # update the parameters
+
+<... end trainig loop ...>
+```
+
+</details>
+
+Different optimizers have different logic for updating model parameters.
+
+<details>
+<summary>What optimizers have you heard of?</summary>
+
+Some built-in ones include:
+
+- [SGD](https://docs.pytorch.org/docs/stable/generated/torch.optim.SGD.html), optionally with momentum;
+- [AdaGrad](https://docs.pytorch.org/docs/stable/generated/torch.optim.Adagrad.html);
+- [RMSProp](https://docs.pytorch.org/docs/stable/generated/torch.optim.RMSprop.html);
+- [Adam](https://docs.pytorch.org/docs/stable/generated/torch.optim.Adam.html);
+- [AdamW](https://docs.pytorch.org/docs/stable/generated/torch.optim.AdamW.html) <- **most popular**;
+- [Muon](https://docs.pytorch.org/docs/2.15/generated/torch.optim.Muon.html) <- **gaining popularity**.
+
+</details>
+
+### Stochastic gradient descent (SGD)
+
+<details>
+
+<summary>What was the formula for the plain SGD we discussed last time?</summary>
+
+$$w_{i,t+1} = w_{i,t} - \lambda g_{i,t}$$
+
+</details>
+
+#### Task 01
+
+**Description:**
+
+Define an abstract base class `Optimizer` in `dl_lib.optim.optimizer`. Given a list of parameters and a learning rate, it:
+
+- stores the parameters and the learning rate on construction.
+- provides a method `zero_grad` that zeroes every parameter's gradient.
+- declares an abstract method `step`, left for every subclass to implement with its own update rule.
+
+Since this class is meant to be inherited and extended with update logic, we won't be using it in a script now.
+
+**Acceptance criteria:**
+
+- An ABC `Optimizer` is defined.
+
+**Test cases:** See `tests/test_dl_lib/test_optim/test_optimizer.py`.
+
+#### Task 02
+
+**Description:**
+
+Define a class `SGD` that extends `Optimizer`. Its step updates every parameter, in place, under `torch.no_grad()` so the update itself is not tracked for `autograd`.
+
+Create a script that constructs an `SGD` over one parameter. Manually set the gradient of that parameter, do one step, and print the parameter's value before and after the step.
+
+**Acceptance criteria:**
+
+- The SGD algorithm is implemented.
+
+**Test cases:** See `tests/test_dl_lib/test_optim/test_optimizers.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 6 -t 2
+```
+
+```text
+Before step: p = tensor([1., 2.])
+After step:  p = tensor([0.9900, 1.9800])
+```
+
+Ok - great! Let's see it in action.
+
+#### Task 03
+
+**Description:**
+
+Create a script that minimizes `f(x) = x**4 + x**3 - 5*x**2` starting from `x0 = 2.0` with plain SGD for a fixed number of steps at a fixed learning rate. It records every visited `x`, plots the curve with the trajectory overlaid as connected points, and prints the final `x` and `f(x)`.
+
+**Acceptance criteria:**
+
+- It is validated visually that plain SGD can get trapped in a local minimum and never reach the global minimum of a function.
+
+**Example output:**
+
+```bash
+python run.py -w 6 -t 3
+```
+
+```text
+Plain SGD final x: 1.2500, f(x) = -3.4180
+```
+
+![Plain SGD trajectory trapped in a local minimum](assets/w06_task03_sgd_local_minimum.png "Plain SGD trajectory trapped in a local minimum")
+
+<details>
+<summary>What does the chart show?</summary>
+
+SGD can get stuck:
+
+- oscillating across a narrow valley;
+- or stalling in a shallow dip where the gradient is small but not zero.
+
+</details>
+
+<details>
+<summary>How can we fix this?</summary>
+
+Momentum keeps a running "velocity" that accumulates gradients over time, the same way a rolling ball keeps some of its speed from the last step.
+
+A consistent downhill direction builds up speed, and a small shallow dip is not enough to stop a ball that already has momentum.
+
+$$v_{i,t} = \mu v_{i,t-1} + g_{i,t}$$
+
+$$w_{i,t+1} = w_{i,t} - \lambda v_{i,t}$$
+
+Here, $\mu$ is the momentum coefficient and $v$ is the momentum buffer.
+
+> [!NOTE]
+> Pytorch directly sets $v_{i,1}$ to $g_{i,1}$.
+>
+> With zero dampening (how much of the new gradient to *ignore*), this gives the same result as starting with $v_{i,0}=0$ and calculating $v_{i,1}$ using the formula from above (we'll do this in our implementation).
+
+</details>
+
+<details>
+<summary>How does Nesterov momentum work?</summary>
+
+First, we update the momentum buffer as shown above.
+
+To do the update, we use the current gradient plus a momentum-scaled copy of the updated buffer:
+
+$$w_{i,t+1} = w_{i,t} - \lambda \left(g_{i,t} + \mu v_{i,t}\right)$$
+
+</details>
+
+#### Task 04
+
+**Description:**
+
+Extend `SGD` with a parameter for momentum, defaulting to `0.0`.
+
+- On construction, it initializes a list `velocities` of zero tensors, one tensor per parameter and in the same order as `params`.
+- With momentum, `step` keeps using that list: each call first updates the velocity, then adds that velocity to the parameter.
+
+Apply SGD with momentum in Task 03 and see if you can beat plain SGD.
+
+Then, runs SGD it on a function shaped like a steep, narrow ravine (`f(x, y) = 10 * x**2 + 0.1 * y**2`), where the gradient is far larger in one direction than the other at every point. It records the trajectory and plots it over the function's contours, together with the final position.
+
+> [!NOTE]
+> Feel free to refer to `cheat_sheet.md` for guidance on how to create the contour plot!
+
+**Acceptance criteria:**
+
+- The class `SGD` supports momentum in a backward compatible manner.
+
+**Test cases:** See `tests/test_dl_lib/test_optim/test_optimizers.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 6 -t 4
+```
+
+```text
+Plain SGD final x: 1.2500, f(x) = -3.4180
+Momentum SGD final x: -1.9995, f(x) = -12.0000
+Momentum SGD on ravine final: x=-0.0747, y=-0.0566
+```
+
+![SGD trajectory with and without momentum](assets/w06_task04_momentum_trajectory.png "SGD trajectory with and without momentum")
+
+![SGD with momentum zig-zagging in a steep, narrow ravine](assets/w06_task04_momentum_ravine.png "SGD with momentum zig-zagging in a steep, narrow ravine")
+
+<details>
+<summary>What does this graph show?</summary>
+
+The ravine's gradient is much larger across its width than along its length. Momentum builds up speed in that steep direction too, so it keeps overshooting from one wall to the other instead of moving steadily toward the minimum along the shallow direction.
+
+</details>
+
+<details>
+<summary>How do we call the learning rate and momentum in the context of SGD?</summary>
+
+Hyperparameters.
+
+</details>
+
+<details>
+<summary>How can we define these types of parameters?</summary>
+
+Training is the process of finding the optimal values of a neural network's parameters.
+
+Hyperparameters, thus, are (all of) the parameters of this training process. *They are meta-parameters from the point of view of the neural network.*
+
+</details>
+
+<details>
+<summary>How do we call the process of finding the optimal hyperparameters?</summary>
+
+Hyperparameter tuning!
+
+</details>
+
+#### Task 05
+
+**Description:**
+
+Create a script that samples several `(lr, momentum)` pairs from seeded uniform ranges, runs SGD on the same function from Task 04 for a fixed number of steps for each pair, and prints one row per sampled configuration (learning rate, momentum, final `x`, final `f(x)`) followed by the single best configuration.
+
+**Acceptance criteria:**
+
+- Hyperparameter tuning is performed.
+
+**Example output:**
+
+```bash
+python run.py -w 6 -t 5
+```
+
+```text
+      lr   momentum    final x       f(x)
+  0.0480     0.9194    -2.0007   -12.0000
+  0.0075     0.0823     1.2500    -3.4180
+  0.0426     0.7139    -2.0000   -12.0000
+  0.0351     0.2989     1.2500    -3.4180
+  0.0323     0.5886     1.2500    -3.4180
+  0.0312     0.1536     1.2500    -3.4180
+  0.0244     0.3817     1.2500    -3.4180
+  0.0375     0.9650    -1.9199   -11.9201
+Best config: lr=0.0426, momentum=0.7139 -> x=-2.0000, f(x)=-12.0000
+```
+
+<details>
+<summary>What does the table show?</summary>
+
+- Most low-momentum configurations never escape the shallow dip at `x = 1.25`.
+- Only the pairs with enough momentum (roughly `momentum > 0.7`) carry the point over the hump and into the deeper minimum. This is why usually momentum is usually set to be at least `0.9`. See the example here: <https://docs.pytorch.org/docs/2.15/generated/torch.optim.SGD.html>.
+
+</details>
+
+### Adaptive gradients
+
+<details>
+<summary>What are the limitations of SGD (with and without momentum)?</summary>
+
+The learning rate is fixed across every parameter - what if some parameters need bigger steps than others?
+
+- A parameter whose gradient is consistently small moves slowly under a shared learning rate.
+- A parameter whose gradient is consistently large can overshoot at that same rate.
+
+</details>
+
+<details>
+<summary>How can we fix this?</summary>
+
+Let's give each parameter its own learning rate.
+
+We'll scaled it down by how large that parameter's gradients have been so far.
+
+</details>
+
+<details>
+<summary>What is the exact AdaGrad update?</summary>
+
+$$v_{i,t} = v_{i,t-1} + g_{i,t}^2$$
+
+$$w_{i,t+1} = w_{i,t} - \lambda\frac{g_{i,t}}{\sqrt{v_{i,t}}+\epsilon}$$
+
+starting from $v_{i,0} = 0$.
+
+</details>
+
+#### Task 06
+
+**Description:**
+
+Define a class `AdaGrad` extending `Optimizer`.
+
+- Constructed with an `eps` for numerical stability (default `1e-10`), it initializes a list of zero tensors - `accumulators`, one per parameter and in the same order as `params`.
+- Its `step` per parameter:
+  - adds the squared gradient to that parameter's entry in `accumulators`.
+  - updates the parameter so parameters with a larger accumulated gradient history take smaller steps.
+
+Create a script that runs SGD with momentum and AdaGrad from the same starting point on the ravine function.
+
+It then runs AdaGrad twice on a separate, one-parameter function: `f(x) = 0.5 * x**2`, both starting from the same point, except that one run receives a single much larger gradient on the very first step. It records both trajectories and plots them together, along with each run's final value.
+
+**Acceptance criteria:**
+
+- The `AdaGrad` algorithm is implemented.
+
+**Test cases:** See `tests/test_dl_lib/test_optim/test_optimizers.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 6 -t 6
+```
+
+```text
+SGD (momentum) final: x=-0.0747, y=-0.0566
+AdaGrad final:        x=0.0000, y=0.0000
+AdaGrad (no spike) final x: 0.0275
+AdaGrad (early spike) final x: 3.3492
+```
+
+![AdaGrad vs. SGD with momentum on an elongated ravine](assets/w06_task06_adagrad_ravine.png "AdaGrad vs. SGD with momentum on an elongated ravine")
+
+![AdaGrad stalls after one unusually large early gradient](assets/w06_task06_adagrad_spike.png "AdaGrad stalls after one unusually large early gradient")
+
+<details>
+<summary>What do these graphs show?</summary>
+
+In the ravine, SGD with momentum keeps overshooting across the steep direction while barely moving along the shallow one. AdaGrad shrinks its steps in the steep direction and keeps them larger in the shallow one, so it heads straight for the minimum instead.
+
+In the spike plot, both runs face identical gradients after step 1. The run that saw one oversized gradient early on never catches up: that single step inflated its accumulator forever, so its learning rate stays small for the rest of training.
+
+</details>
+
+<details>
+<summary>What is the limitation of AdaGrad?</summary>
+
+AdaGrad's accumulator only ever grows, so after enough steps it becomes so large that the effective learning rate collapses to almost zero.
+
+</details>
+
+<details>
+<summary>What does this mean for training?</summary>
+
+It effectively stops.
+
+</details>
+
+<details>
+<summary>How can we fix it?</summary>
+
+We can replace the raw running sum with an exponential moving average.
+
+In this way the old gradient history fades out instead of piling up forever, keeping the effective learning rate from vanishing.
+
+The algorithm that does this is called `RMSprop`:
+
+$$v_{i,t} = \rho v_{i,t-1} + (1-\rho) g_{i,t}^2$$
+
+$$w_{i,t+1} = w_{i,t} - \lambda\frac{g_{i,t}}{\sqrt{v_{i,t}}+\epsilon}$$
+
+where $\rho$ is the decay rate (called `alpha` in the code), starting from $v_{i,0} = 0$.
+
+</details>
+
+#### Task 07
+
+**Description:**
+
+Define a class `RMSprop` that is constructed with a decay rate `alpha` (default `0.99`) and an `eps` for numerical stability (default `1e-8`).
+
+It too initializes a list of zero tensors - `accumulators`, one per parameter and in the same order as `params`.
+
+Its step, per parameter:
+
+- updates that parameter's entry in `accumulators` as an exponential moving average.
+- updates the parameter with the same rule `AdaGrad` uses.
+
+Create a script that runs `AdaGrad` and `RMSprop` on the same one-parameter function.
+
+It then runs `RMSprop` twice more on that same function from the same starting point, once with the exact gradient at every step and once with a fixed amount of random noise added to the gradient at every step.
+
+**Acceptance criteria:**
+
+- The `RMSprop` algorithm is implemented.
+
+**Test cases:** See `tests/test_dl_lib/test_optim/test_optimizers.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 6 -t 7
+```
+
+```text
+AdaGrad (early spike) final x: 3.3492
+RMSprop (early spike) final x: 0.0000
+RMSprop (clean gradient) final x: 0.0000
+RMSprop (noisy gradient) final x: 0.2565
+```
+
+![RMSprop recovers from an early gradient spike where AdaGrad stalls](assets/w06_task07_rmsprop_spike_recovery.png "RMSprop recovers from an early gradient spike where AdaGrad stalls")
+
+<details>
+<summary>What does this graph show?</summary>
+
+Both runs see the same oversized gradient on step 1. `AdaGrad`'s accumulator keeps that spike forever, so its effective learning rate stays tiny for the rest of training. `RMSprop`'s exponential moving average discounts that same spike more and more with every later step, so it recovers and reaches the minimum almost immediately.
+
+</details>
+
+![RMSprop jitters around the minimum under noisy gradients](assets/w06_task07_rmsprop_noise_jitter.png "RMSprop jitters around the minimum under noisy gradients")
+
+<details>
+<summary>What does this graph show?</summary>
+
+RMSprop only rescales how large a step is; it has **no memory of which direction previous steps moved** in, so it cannot average away noise in the gradient's direction the way momentum does.
+
+</details>
+
+<details>
+<summary>How can we fix it?</summary>
+
+`SGD` with momentum smooths the update direction; `RMSprop` adapts the learning rate per parameter. `Adam` combines both ideas into a single update rule, with a correction for the fact that both running averages start at zero and are biased low early in training.
+
+$$\tilde g_{i,t} = g_{i,t} + \gamma w_{i,t} \quad \text{(when weight decay } \gamma \text{ is set)}$$
+
+$$m_{i,t} = \beta_1 m_{i,t-1} + (1-\beta_1) \tilde g_{i,t}$$
+
+$$v_{i,t} = \beta_2 v_{i,t-1} + (1-\beta_2) \tilde g_{i,t}^2$$
+
+$$\widehat{m}_{i,t} = \frac{m_{i,t}}{1-\beta_1^t}, \qquad \widehat{v}_{i,t} = \frac{v_{i,t}}{1-\beta_2^t}$$
+
+$$w_{i,t+1} = w_{i,t} - \lambda\frac{\widehat{m}_{i,t}}{\sqrt{\widehat{v}_{i,t}}+\epsilon}$$
+
+starting from $m_{i,0} = 0$ and $v_{i,0} = 0$.
+
+</details>
+
+You can notice that there is a correction done on the values of $m$ and $v$. This is known as Adam's **bias correction** for the initial steps of the optimizer.
+
+Suppose the first gradient is \(g_1=2\), with Adam's usual \(\beta_1=0.9\) and \(\beta_2=0.999\). Since both running averages start at zero:
+
+\[
+m_1=0.9(0)+0.1(2)=0.2
+\]
+\[
+v_1=0.999(0)+0.001(2^2)=0.004
+\]
+
+Those averages are much smaller than the gradient and its square because they’ve only had one step to build up. Bias correction gives:
+
+\[
+\hat m_1=\frac{0.2}{1-0.9}=2,
+\qquad
+\hat v_1=\frac{0.004}{1-0.999}=4
+\]
+
+So for learning rate \(\lambda\), Adam’s first update is approximately
+
+\[
+-\lambda\frac{\hat m_1}{\sqrt{\hat v_1}}
+=-\lambda\frac{2}{2}
+=-\lambda.
+\]
+
+The correction adjusts the averages for the fact that they started at zero.
+
+#### Task 08
+
+**Description:**
+
+Define a class `Adam` that is constructed with:
+
+- `beta1` (default `0.9`);
+- `beta2` (default `0.999`);
+- `eps` (default `1e-8`);
+- an optional `weight_decay` (default `0.0`).
+
+It initializes a first-moment list `m` and a second-moment list `v`, both zero tensors per parameter and in the same order as `params`, and a shared step counter `t` starting at `0`.
+
+Its `step`, per parameter:
+
+- folds `weight_decay * p` into the gradient first, when `weight_decay` is set (the L2-style approach);
+- updates `m` and `v`;
+- bias-corrects both with `t` across all parameters;
+- updates the parameter.
+
+Create a script that runs `RMSprop` and `Adam` on the same one-parameter function from the same starting point, with a fixed amount of random noise added to the gradient at every step. It records both trajectories and plots them together, along with each run's final value.
+
+It then constructs two `Adam` optimizers with the same `weight_decay`, one whose second-moment estimate already holds a large value and one whose second-moment estimate already holds a small value, simulating two parameters with very different histories of gradient magnitude. It runs each for the same number of steps with no other gradient signal. It records both trajectories and plots them together, along with each run's final value.
+
+**Acceptance criteria:**
+
+- The `Adam` algorithm is implemented.
+- It is validated visually that Adam's momentum smooths out noisy gradients that make RMSprop jitter.
+- It is validated visually that Adam decays two parameters with the same `weight_decay` at different rates when their gradient histories differ.
+
+**Test cases:** See `tests/test_dl_lib/test_optim/test_optimizers.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 6 -t 8
+```
+
+```text
+RMSprop (noisy gradient) final x: 0.2565
+Adam (noisy gradient) final x: 0.0095
+Adam (large gradient history) final p: 0.9743
+Adam (small gradient history) final p: 0.8763
+```
+
+![Adam's momentum smooths out noisy gradients where RMSprop jitters](assets/w06_task08_adam_noise_smoothing.png "Adam's momentum smooths out noisy gradients where RMSprop jitters")
+
+<details>
+<summary>What does this graph show?</summary>
+
+Both runs see the exact same noisy gradients at every step. RMSprop's rescaled step still follows each step's noisy direction, so it jitters once it nears the minimum. Adam's first-moment estimate averages that same noisy direction across recent steps, so its path stays smooth all the way down.
+
+</details>
+
+![Adam decays two parameters with the same weight_decay at different rates](assets/w06_task08_adam_uneven_decay.png "Adam decays two parameters with the same weight_decay at different rates")
+
+<details>
+<summary>What does this graph show?</summary>
+
+Both parameters start at the same value, see no gradient other than the weight decay term, and share the same `weight_decay`. Adam folds `weight_decay * p` into the gradient before dividing by `sqrt(v_hat)`, so the parameter whose second moment is already large gets divided down more and decays more slowly, while the one with a small second moment decays faster - the same nominal decay rate produces two different outcomes.
+
+</details>
+
+<details>
+<summary>What is the limitation of Adam?</summary>
+
+Adam's `weight_decay` is added directly into the gradient before the moment estimates are computed, so it gets divided by `sqrt(v_hat)` along with the rest of the gradient - a parameter with large gradients gets *less* decay than one with small gradients, which is an accident of the adaptive learning rate, not an intentional design choice.
+
+</details>
+
+<details>
+<summary>How can we fix it?</summary>
+
+Apply weight decay as a separate term after the adaptive update instead, so every parameter decays by the same proportion regardless of its gradient history.
+
+This is the one change that makes AdamW the more common default for training large models today.
+
+</details>
+
+<details>
+<summary>What is the exact AdamW update?</summary>
+
+$$m_{i,t} = \beta_1 m_{i,t-1} + (1-\beta_1) g_{i,t}$$
+
+$$v_{i,t} = \beta_2 v_{i,t-1} + (1-\beta_2) g_{i,t}^2$$
+
+$$\widehat{m}_{i,t} = \frac{m_{i,t}}{1-\beta_1^t}, \qquad \widehat{v}_{i,t} = \frac{v_{i,t}}{1-\beta_2^t}$$
+
+$$w_{i,t+1} = (1-\lambda\gamma) w_{i,t} - \lambda\frac{\widehat{m}_{i,t}}{\sqrt{\widehat{v}_{i,t}}+\epsilon}$$
+
+where $g_{i,t}$ excludes the weight-decay term, and $\gamma \ge 0$ is the weight-decay coefficient (called `weight_decay` in the code), starting from $m_{i,0} = 0$ and $v_{i,0} = 0$.
+
+</details>
+
+#### Task 09
+
+**Description:**
+
+Define a class `AdamW` extending `Adam`.
+
+It overrides `step` to use the exact same moment updates and bias correction as `Adam`, but computes them from the raw gradient only (never adding `weight_decay * p` into it), and after the adaptive update applies the parameter update as a separate term when `weight_decay` is set.
+
+Create a script that constructs two `AdamW` optimizers with the same `weight_decay`, one whose second-moment estimate already holds a large value and one whose second-moment estimate already holds a small value, simulating two parameters with very different histories of gradient magnitude. It runs each for the same number of steps with no other gradient signal. It records both trajectories and plots them together, along with each run's final value.
+
+**Acceptance criteria:**
+
+- The `AdamW` algorithm is implemented.
+- It is validated visually that AdamW decays both parameters by the same proportion regardless of their gradient history, where Adam decayed them at different rates.
+
+**Test cases:** See `tests/test_dl_lib/test_optim/test_optimizers.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 6 -t 9
+```
+
+```text
+AdamW (large gradient history) final p: 0.8605
+AdamW (small gradient history) final p: 0.8605
+```
+
+![AdamW decays both parameters by the same proportion](assets/w06_task09_adamw_even_decay.png "AdamW decays both parameters by the same proportion")
+
+<details>
+<summary>What does this graph show?</summary>
+
+Both parameters start at the same value and share the same `weight_decay`, but now AdamW applies that decay as a separate term after the adaptive update, instead of folding it into the gradient. It no longer gets divided by `sqrt(v_hat)`, so the two parameters, despite their very different second-moment histories, shrink by the exact same proportion at every step - the two curves sit on top of each other.
+
+</details>
+
+### Comparing the five optimizers
+
+Every optimizer this week has been exercised on a toy tensor in isolation. This task puts all five to work on the same real-looking problem, a small linear regression, and reports which one actually gets there fastest.
+
+#### Task 10
+
+**Description:**
+
+Create a script that:
+
+- builds a synthetic linear dataset (`y = 2.5x - 1.0` plus Gaussian noise, seeded for reproducibility) using `torch.linspace` for `x`.
+- trains bias, starting from zero, a single weight with each of `SGD`, `AdaGrad`, `RMSprop`, `Adam`, and `AdamW` for the same fixed number of epochs, each with a learning rate tuned on this problem (`Adam` and `AdamW` additionally use a small `weight_decay` so the two are visibly different).
+- prints a model report: a baseline row holding the mean predictor's mean-squared-error loss, followed by one row per optimizer in the order they were tried, each showing its final loss and the signed percent change versus the baseline, and a comment.
+- names the single best-performing optimizer explicitly at the bottom of the report.
+
+**Acceptance criteria:**
+
+- Optimizers are compared on a regression task.
+
+**Example output:**
+
+```bash
+python run.py -w 6 -t 10
+```
+
+```text
+optimizer    final loss    vs baseline  comment
+baseline       18.76643 +         0.0%  mean predictor, ignores x
+SGD             0.97043 -        94.8%  plain gradient descent, no momentum
+AdaGrad         0.24180 -        98.7%  per-parameter learning rate, needs a bigger lr here
+RMSprop         0.23746 -        98.7%  decayed accumulator, fastest to converge here
+Adam            3.76134 -        80.0%  L2-style decay folded into the gradient
+AdamW           4.42134 -        76.4%  decoupled decay, differs from Adam above
+Best optimizer: RMSprop (final loss = 0.23746)
+```
+
+> [!WARNING]
+> There is no single/direct answer to the question *Which is the best optimizer?*! As you can see different tasks may be solved with different optimizers.
+>
+> Always do experiments and use their outcomes to gain experience on what would work in a similar context.
+
+### Update rules
+
+**SGD**
+
+$$
+\boxed{
+w_{i,t+1} = w_{i,t} - \lambda g_{i,t}
+}
+$$
+
+**SGD with momentum**
+
+$$
+\boxed{
+v_{i,t} = \mu v_{i,t-1} + g_{i,t}
+}
+$$
+
+$$
+\boxed{
+w_{i,t+1} = w_{i,t} - \lambda v_{i,t}
+}
+$$
+
+starting from $v_{i,0} = 0$.
+
+**SGD with Nesterov momentum**
+
+$$
+\boxed{
+w_{i,t+1} = w_{i,t} - \lambda \left(g_{i,t} + \mu v_{i,t}\right)
+}
+$$
+
+with $v_{i,t}$ updated the same way as in SGD with momentum above.
+
+**AdaGrad**
+
+$$
+\boxed{
+v_{i,t} = v_{i,t-1} + g_{i,t}^2
+}
+$$
+
+$$
+\boxed{
+w_{i,t+1} = w_{i,t} - \lambda\frac{g_{i,t}}{\sqrt{v_{i,t}}+\epsilon}
+}
+$$
+
+starting from $v_{i,0} = 0$.
+
+**RMSprop**
+
+$$
+\boxed{
+v_{i,t} = \rho v_{i,t-1} + (1-\rho) g_{i,t}^2
+}
+$$
+
+$$
+\boxed{
+w_{i,t+1} = w_{i,t} - \lambda\frac{g_{i,t}}{\sqrt{v_{i,t}}+\epsilon}
+}
+$$
+
+where $\rho$ is the decay rate (called `alpha` in the code), starting from $v_{i,0} = 0$.
+
+**Adam**
+
+$$
+\boxed{
+\tilde g_{i,t} = g_{i,t} + \gamma w_{i,t} \quad \text{(when weight decay } \gamma \text{ is set)}
+}
+$$
+
+$$
+\boxed{
+m_{i,t} = \beta_1 m_{i,t-1} + (1-\beta_1) \tilde g_{i,t}
+}
+$$
+
+$$
+\boxed{
+v_{i,t} = \beta_2 v_{i,t-1} + (1-\beta_2) \tilde g_{i,t}^2
+}
+$$
+
+$$
+\boxed{
+\widehat{m}_{i,t} = \frac{m_{i,t}}{1-\beta_1^t}
+}
+$$
+
+$$
+\boxed{
+\widehat{v}_{i,t} = \frac{v_{i,t}}{1-\beta_2^t}
+}
+$$
+
+$$
+\boxed{
+w_{i,t+1} = w_{i,t} - \lambda\frac{\widehat{m}_{i,t}}{\sqrt{\widehat{v}_{i,t}}+\epsilon}
+}
+$$
+
+starting from $m_{i,0} = 0$ and $v_{i,0} = 0$.
+
+**AdamW**
+
+$$
+\boxed{
+m_{i,t} = \beta_1 m_{i,t-1} + (1-\beta_1) g_{i,t}
+}
+$$
+
+$$
+\boxed{
+v_{i,t} = \beta_2 v_{i,t-1} + (1-\beta_2) g_{i,t}^2
+}
+$$
+
+$$
+\boxed{
+\widehat{m}_{i,t} = \frac{m_{i,t}}{1-\beta_1^t}
+}
+$$
+
+$$
+\boxed{
+\widehat{v}_{i,t} = \frac{v_{i,t}}{1-\beta_2^t}
+}
+$$
+
+$$
+\boxed{
+w_{i,t+1} = (1-\lambda\gamma) w_{i,t} - \lambda\frac{\widehat{m}_{i,t}}{\sqrt{\widehat{v}_{i,t}}+\epsilon}
+}
+$$
+
+where $g_{i,t}$ excludes the weight-decay term, and $\gamma \ge 0$ is the weight-decay coefficient (called `weight_decay` in the code), starting from $m_{i,0} = 0$ and $v_{i,0} = 0$.
+
+## Week 07 - Regularization and Normalization
+
+### Task 01
+
+**Description:**
+
+Create a script that builds a two-hidden-layer `Tanh` MLP (ex. `10 -> 64 -> 64 -> 1`), trains it on a small (20-example) synthetic linear-regression dataset, and evaluates it on a larger (200-example) held-out set drawn from the same distribution after every epoch.
+
+For each example, sample standard-normal inputs `(n, 10)`, then standard-normal noise/error `(n, 1)` scaled by `0.1`. The targets would be `x @ true_w + noise`, where `true_w` is `(10, 1)` standard-normal sampled using a separate generator. Train for 300 full-batch epochs with MSE and learning rate `0.01`.
+
+Plot the train and test loss curves over training and print the final train loss and test loss.
+
+> [!NOTE]
+> If you can produce the same outcome with another/simpler architecture or training process, this is completely fine for the task.
+
+**Acceptance criteria:**
+
+- The trend of the below graph is reproduced.
+
+**Example output:**
+
+```bash
+python run.py -w 7 -t 1
+```
+
+```text
+Final losses: train loss = 0.0000, test loss = 6.1239
+```
+
+![w07_task01_overfitting.png](assets/w07_task01_overfitting.png "w07_task01_overfitting.png")
+
+<details>
+<summary>How can we interpret this chart?</summary>
+
+We see overfitting!
+
+The train loss collapses to zero while the test loss keeps climbing: the model has memorized its 20 training examples instead of learning the underlying linear relationship.
+
+</details>
+
+<details>
+<summary>How can we solve this?</summary>
+
+We can add regularization and counter the high variance by introducing bias.
+
+One of the ways this can be done is weight decay / L2 regularization.
+
+Another is Dropout and that's what we'll use today.
+
+</details>
+
+<details>
+<summary>What is the added value of Dropout?</summary>
+
+It does regularization by introducing bias into the network while it is training.
+
+The general idea is to zero out a randomly chosen number of activations of the preceding layer.
+
+> [!NOTE]
+> Read the paper that introduced Dropout: Srivastava, Hinton, Krizhevsky, Sutskever, Salakhutdinov, ["Dropout: A Simple Way to Prevent Neural Networks from Overfitting"](https://jmlr.org/papers/v15/srivastava14a.html), JMLR 2014.
+
+</details>
+
+<details>
+<summary>Which figure in the paper provides an example of this?</summary>
+
+![w07_dropout_example.png](assets/w07_dropout_example.png "w07_dropout_example.png")
+
+</details>
+
+<details>
+<summary>Does it also do that during inference/validation time?</summary>
+
+No - then the predictions use the full network.
+
+</details>
+
+<details>
+<summary>Which figure in the paper provides an example of this?</summary>
+
+![w07_dropout_inference.png](assets/w07_dropout_inference.png "w07_dropout_inference.png")
+
+</details>
+
+<details>
+<summary>How would be able to deal with this switch programmatically?</summary>
+
+We have to use the state of the module. We'll need to have a property - `training`, of each instance of `nn.Module` that'll dictate the behavior of the module when it is called.
+
+</details>
+
+### Task 02
+
+**Description:**
+
+Add a `training` flag on `Module`, defaulting to `True`, together with `train()` and `eval()` methods that set it to `True` and `False`.
+
+`Sequential` overrides both methods so that calling `train()`/`eval()` on it also calls `train()`/`eval()` on every submodule it holds, including submodules nested inside another `Sequential`.
+
+**Acceptance criteria:**
+
+- The flag `training` is implemented.
+
+**Test cases:**
+
+See `tests/test_dl_lib/test_nn/test_module.py` and `tests/test_dl_lib/test_nn/test_sequential.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 7 -t 2
+```
+
+```text
+Before eval: outer.training = True, inner.training = True
+After eval:  outer.training = False, inner.training = False
+After train: outer.training = True, inner.training = True
+```
+
+Let's say we have created a dropout layer with `p=0.5` and it receives the following input:
+
+$$
+x = [1,1,1,1,1,1,1,1]
+$$
+
+<details>
+<summary>Open the PyTorch documentation - is <code>p</code> the probability of keeping or zeroing an activation?</summary>
+
+It is the probability to zero out an element:
+
+![w07_dropout_docs.png](assets/w07_dropout_docs.png "w07_dropout_docs.png")
+
+</details>
+
+<details>
+<summary>What about in the paper?</summary>
+
+> [!IMPORTANT]
+> In the paper (<https://jmlr.org/papers/v15/srivastava14a.html>) `p` is the probability to keep an element!
+
+</details>
+
+<details>
+<summary>What is the next step?</summary>
+
+We sample a random mask for each element. You can think of it as throwing a coin `len(x)` times. Suppose this call produces:
+
+$$
+m = [0,1,0,0,0,1,0,1]
+$$
+
+</details>
+
+<details>
+<summary>What is the next step?</summary>
+
+We apply the mask:
+
+$$
+\widetilde{x} = x \odot m
+$$
+
+and get:
+
+$$
+\widetilde{x} = [0,1,0,0,0,1,0,1]
+$$
+
+</details>
+
+Suppose the next neuron adds these eight values using weights of \(2\) and a bias of \(-8\):
+
+$$
+z = 2\sum_{i=1}^{8}\widetilde{x}_i - 8.
+$$
+
+During training, four values survive on average (because `p=0.5`), so its average weighted input is:
+
+$$
+\mathbb{E}[z_{\text{train}}] = 2(4)-8=0.
+$$
+
+For our particular mask, only three survive, giving \(z=2(3)-8=-2\).
+
+During evaluation, dropout is disabled and all eight values reach the neuron:
+
+$$
+z_{\text{eval}} = 2(8)-8=8.
+$$
+
+The weights and bias have not changed, but the neuron's input has shifted from a training average of \(0\) to an evaluation value of \(8\).
+
+<details>
+<summary>What is the problem we have?</summary>
+
+The learned weights and bias are not suited to this new input scale.
+
+</details>
+
+<details>
+<summary>How do we solve this?</summary>
+
+We **scale surviving values** by \(1/(1-p)\).
+
+With \(p=0.5\), this doubles them:
+
+$$
+y = \frac{x \odot m}{1-p}
+= [0,2,0,0,0,2,0,2].
+$$
+
+Now four values survive on average, each contributing \(2\). Their expected sum is \(8\), so the same neuron's average weighted input becomes:
+
+$$
+\mathbb{E}[z_{\text{train,scaled}}]
+=2(4\times2)-8
+=8.
+$$
+
+During evaluation, all eight original values pass through unchanged:
+
+$$
+z_{\text{eval}}=2(8)-8=8.
+$$
+
+The expected training input now matches the evaluation input.
+
+Individual masks still produce fluctuations but switching off dropout no longer introduces a systematic shift in the mean.
+
+</details>
+
+During backpropagation we reuse the mask. For each element:
+
+\[
+y_i=\frac{w_i m_i}{1-p}.
+\]
+
+The sampled mask \(m_i\) is treated as constant, so:
+
+\[
+\frac{\partial y_i}{\partial w_i}
+= \frac{m_i}{1-p}
+\underbrace{\frac{\partial w_i}{\partial w_i}}_{1}
+= \frac{m_i}{1-p}.
+\]
+
+Applying the chain rule:
+
+\[
+\boxed{
+\frac{\partial\mathcal L}{\partial w_i}
+= \frac{\partial\mathcal L}{\partial y_i}
+\frac{\partial y_i}{\partial w_i}
+= \frac{\partial\mathcal L}{\partial y_i}
+\frac{m_i}{1-p}
+}
+\]
+
+<details>
+<summary>What gradient do masked elements receive?</summary>
+
+\(m_i=0\) => zero gradient
+
+</details>
+
+<details>
+<summary>What about surviving elements?</summary>
+
+They receive the incoming gradient multiplied by \(1/(1-p)\), matching the forward-pass scaling.
+
+</details>
+
+### Task 03
+
+**Description:**
+
+Define the `Dropout` class. It provides:
+
+- construction: takes a drop probability `p`, defaulting to `0.5`. Raises `ValueError` if `p` is outside `[0, 1]`.
+- `forward`: in evaluation mode, or when `p` is `0.0`, returns the input unchanged. In training mode, zeroes each element independently with probability `p`, and scales every surviving element.
+
+Rerun the previous task with dropout layers inserted after each hidden layer's activations and plot the train/test loss curves.
+
+**Acceptance criteria:**
+
+- The effects of `Dropout` are visualized.
+
+**Test cases:**
+
+See `tests/test_dl_lib/test_nn/test_dropout.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 7 -t 3
+```
+
+```text
+With Dropout: train loss = 2.7817, test loss = 2.2676
+```
+
+![w07_task03_dropout_narrows_gap.png](assets/w07_task03_dropout_narrows_gap.png "w07_task03_dropout_narrows_gap.png")
+
+### Task 04
+
+**Description:**
+
+Apply the script from the first task on one synthetic dataset of `128` examples, without noise or a held-out set.
+
+This time build a `12` hidden linear layers of width `32`, placing `Tanh` in-between, followed by a final `32 -> 1` output layer. Initialize weights as standard-normal values scaled by `0.1` and set biases to zero. Train for 50 epochs with a learning rate of `0.01`.
+
+Objectives:
+
+- Print three training losses: the MSE at epochs `0`, `25`, and `49` (the first, middle, and last epochs). Record each loss before updating the model's parameters.
+- Measure the gradients of the layers: use the weight gradients calculated during the final epoch's backward pass. Take the absolute value of every weight gradient, then average them to obtain one number per layer. Do not include bias gradients.
+- Print the 13 gradient averages: list them in order, starting with the first hidden layer and ending with the output layer.
+- Plot the gradient averages: use layer numbers `1–13` on the x-axis and their gradient averages on a logarithmic y-axis. A logarithmic scale makes very small values and differences between layers easier to see.
+
+> [!NOTE]
+> If you can produce the same outcome with another/simpler architecture or training process, this is completely fine for the task.
+
+**Acceptance criteria:**
+
+- The trend in the below graph is reproduced.
+
+**Example output:**
+
+```bash
+python run.py -w 7 -t 4
+```
+
+```text
+Without BatchNorm1d: loss[0] = 7.4629, loss[25] = 7.4627, loss[-1] = 7.4626
+Without BatchNorm1d: gradient magnitude per layer = [0.00017717968148645014, 8.156227704603225e-05, 8.813239401206374e-05, 0.00010215472138952464, 9.533659613225609e-05, 8.347261609742418e-05, 8.155079558491707e-05, 0.00010097638005390763, 9.482887253398076e-05, 0.00010848169040400535, 9.530266834190115e-05, 8.592824451625347e-05, 0.0005417605862021446]
+```
+
+![w07_task04_vanishing_gradients.png](assets/w07_task04_vanishing_gradients.png "w07_task04_vanishing_gradients.png")
+
+<details>
+<summary>What does this chart show?</summary>
+
+The loss is frozen to four decimal places across all 50 epochs, and every layer's gradient magnitude sits in the same tiny `1e-4`-`1e-5` band regardless of depth: a textbook example of a **vanishing gradient**.
+
+</details>
+
+<details>
+<summary>How can we solve this?</summary>
+
+We mentioned several possible ways:
+
+- smarter weight initialization;
+  - the biases may help here.
+- smarter input preprocessing;
+- maybe the activation function is not appropriate;
+- residual connections.
+
+Today we'll look at another way of solving this - **batch normalization**!
+
+> [!NOTE]
+> Read the paper that introduced BatchNorm: Ioffe, Szegedy, ["Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift"](https://arxiv.org/abs/1502.03167), ICML 2015.
+
+</details>
+
+<details>
+<summary>How does BatchNorm1d behave during training?</summary>
+
+For each feature, it normalizes the current batch to zero mean and unit variance, using that batch's own mean and variance, then applies a learnable per-feature scale: `gamma`, and shift: `beta`.
+
+</details>
+
+Let's say we have a batch normalization layer. During training, we get this batch:
+
+$$
+X = \begin{bmatrix}
+1 & 10 \\
+1 & 18 \\
+5 & 10 \\
+5 & 18
+\end{bmatrix}.
+$$
+
+Each **row is an example**, and each **column is a feature**.
+
+<details>
+<summary>What is our first step?</summary>
+
+Batch normalization treats each feature separately, using its values across the batch:
+
+- First feature: $[1,1,5,5]$
+- Second feature: $[10,18,10,18]$
+
+We calculate one mean and one variance per column:
+
+$$
+\mu_1 = \frac{1+1+5+5}{4}=3
+$$
+
+$$
+\mu_2 = \frac{10+18+10+18}{4}=14
+$$
+
+So the batch mean is:
+
+$$
+\mu=[3,14].
+$$
+
+Subtracting it from every row gives:
+
+$$
+X-\mu = \begin{bmatrix}
+-2 & -4 \\
+-2 & 4 \\
+2 & -4 \\
+2 & 4
+\end{bmatrix}.
+$$
+
+Both columns now have zero mean, but their scales still differ.
+
+</details>
+
+<details>
+<summary>What is our next step?</summary>
+
+Calculate each feature's **biased variance**: the average squared distance from its mean, dividing by the batch size $N=4$.
+
+$$
+v_1=\frac{(-2)^2+(-2)^2+2^2+2^2}{4}=4
+$$
+
+$$
+v_2=\frac{(-4)^2+4^2+(-4)^2+4^2}{4}=16.
+$$
+
+Divide the centered values by their feature's standard deviation:
+
+$$
+\widehat{X}=\frac{X-\mu}{\sqrt{v+\varepsilon}}.
+$$
+
+Ignoring the tiny $\varepsilon$ for this calculation:
+
+$$
+\widehat{X} = \begin{bmatrix}
+-1 & -1 \\
+-1 & 1 \\
+1 & -1 \\
+1 & 1
+\end{bmatrix}.
+$$
+
+Each column now has zero mean and unit variance.
+
+</details>
+
+<details>
+<summary>What is our next step?</summary>
+
+We apply a (learnable) scale $\gamma$ and a (learnable) shift $\beta$ for each feature:
+
+$$
+Y=\gamma\odot\widehat{X}+\beta.
+$$
+
+Initially:
+
+$$
+\gamma=[1,1],\qquad \beta=[0,0],
+$$
+
+so the normalized values pass through unchanged.
+
+Suppose training later learns:
+
+$$
+\gamma=[2,0.5],\qquad \beta=[1,-1].
+$$
+
+Then our output becomes approximately:
+
+$$
+Y= \begin{bmatrix}
+-1 & -1.5 \\
+-1 & -0.5 \\
+3 & -1.5 \\
+3 & -0.5
+\end{bmatrix}.
+$$
+
+The network can learn the scale and offset it needs after normalization.
+
+</details>
+
+<details>
+<summary>What is our next step?</summary>
+
+We maintain two non-learnable values per feature:
+
+- `running_mean`, initially $[0,0]$.
+- `running_var`, initially $[1,1]$.
+
+During training, update each using:
+
+$$
+\text{running}
+\leftarrow
+(1-m)\,\text{running}+m\,\text{batch statistic},
+$$
+
+where $m$ is `momentum`, defaulting to $0.1$.
+
+For our batch:
+
+$$
+\text{running mean}
+=0.9[0,0]+0.1[3,14]
+=[0.3,1.4].
+$$
+
+To match PyTorch, the running variance uses the **unbiased** batch variance, dividing by $N-1$:
+
+$$
+v_{\text{unbiased}}
+=\frac{N}{N-1}v
+=\left[\frac{16}{3},\frac{64}{3}\right].
+$$
+
+Therefore:
+
+$$
+\text{running variance}
+=0.9[1,1]+0.1
+\left[\frac{16}{3},\frac{64}{3}\right]
+\approx[1.4333,3.0333].
+$$
+
+These updates do not participate in gradient computation.
+
+</details>
+
+<details>
+<summary>What changes when we call <code>eval()</code>?</summary>
+
+The layer uses the saved statistics:
+
+$$
+Y= \gamma\odot
+\frac{X-\text{running mean}}
+{\sqrt{\text{running variance}+\varepsilon}}
++\beta.
+$$
+
+</details>
+
+During backpropagation gradients flow through the normalization, including the batch mean and variance.
+
+Unlike dropout's sampled mask, these statistics **depend on the inputs**. We must account for that dependence.
+
+For one feature, let:
+
+$$
+g_i=\frac{\partial\mathcal L}{\partial y_i}.
+$$
+
+The learnable parameters receive:
+
+$$
+\frac{\partial\mathcal L}{\partial\beta}
+=\sum_i g_i,
+\qquad
+\frac{\partial\mathcal L}{\partial\gamma}
+=\sum_i g_i\widehat{x}_i.
+$$
+
+The input gradient is:
+
+$$
+\boxed{
+\frac{\partial\mathcal L}{\partial x_i}
+= \frac{\gamma}{\sqrt{v+\varepsilon}}
+\left(
+g_i-\operatorname{mean}(g)
+-\widehat{x}_i\operatorname{mean}(g\widehat{x})
+\right)
+}
+$$
+
+All means and sums here run over the batch for that feature.
+
+### Task 05
+
+**Description:**
+
+Define the class `BatchNorm1d`. It should provide:
+
+- construction: accept `num_features`, `eps=1e-5`, and `momentum=0.1`. Create learnable per-feature `gamma` (ones) and `beta` (zeros), plus non-learnable `running_mean` (zeros) and `running_var` (ones).
+- `forward` when training: compute each feature's batch mean and biased variance. Return `gamma * (x - mean) / sqrt(variance + eps) + beta`. Update running statistics without tracking gradients, using `(1 - momentum) * running + momentum * batch_stat`. Use the unbiased batch variance for updating `running_var`.
+- `forward` when not training: normalize using running statistics, apply `gamma` and `beta`, and leave running statistics unchanged.
+- `parameters`: return only `gamma` and `beta`.
+
+Create a demonstration script that:
+
+- Prints input/output feature means and biased variances during training.
+- Prints running statistics before and after one training call, then switches to evaluation and prints the output mean.
+- Repeats Task 04 with `BatchNorm1d` before every `Tanh`, keeping its data, initialization, and training settings. Print the same losses and gradient measurements, and save a logarithmic gradient plot for comparison.
+
+**Acceptance criteria:**
+
+- Compared with Task 04, loss falls substantially and early-layer gradients are larger.
+
+**Test cases:**
+
+See `tests/test_dl_lib/test_nn/test_normalization.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 7 -t 5
+```
+
+```text
+gamma = tensor([1., 1., 1.], requires_grad=True)
+beta  = tensor([0., 0., 0.], requires_grad=True)
+x.mean(dim=0) = tensor([ 4.6368,  0.5793, -3.1433])
+x.var(dim=0, unbiased=False) = tensor([11.9421, 12.4851, 18.8823])
+batch_norm(x).mean(dim=0) = tensor([ 2.9802e-08,  3.7253e-08, -2.9802e-08], grad_fn=<MeanBackward1>)
+batch_norm(x).var(dim=0, unbiased=False) = tensor([1.0000, 1.0000, 1.0000], grad_fn=<VarBackward0>)
+Before any forward call: running_mean = tensor([0., 0., 0.])
+                         running_var  = tensor([1., 1., 1.])
+After one training call: running_mean = tensor([0.1788, 0.1956, 0.2559])
+                         running_var  = tensor([3.9490, 4.8103, 2.5452])
+Evaluating: batch_norm(x).mean(dim=0) = tensor([0.8099, 0.8027, 1.4436], grad_fn=<MeanBackward1>)
+With BatchNorm1d: loss[0] = 7.4267, loss[25] = 0.5486, loss[-1] = 0.3091
+With BatchNorm1d: gradient magnitude per layer = [0.12924525141716003, 0.06648257374763489, 0.05176399275660515, 0.04867493733763695, 0.05708292871713638, 0.06382918357849121, 0.060660116374492645, 0.05594765394926071, 0.06290805339813232, 0.05174217373132706, 0.03969079628586769, 0.01466367021203041, 0.06459763646125793]
+```
+
+![w07_task05_batchnorm_recovers_gradients.png](assets/w07_task05_batchnorm_recovers_gradients.png "w07_task05_batchnorm_recovers_gradients.png")
+
+Compare the training run to Task 04:
+
+- the loss collapses from 7.4267 to 0.3091 instead of staying frozen near 7.46;
+- and every layer's gradient magnitude now sits in the `0.01`-`0.13` range, two to three orders of magnitude larger than Task 04's vanished `1e-4`-`1e-5` band.
+
+### Task 06
+
+**Description:**
+
+Create a script that builds a single `BatchNorm1d` layer and a fixed example `x_fixed`.
+
+For each of three batch sizes (64, 8, and 2), it runs 30 trials: each trial surrounds `x_fixed` with freshly sampled random companions filling out the rest of the batch, and normalizes the whole batch.
+
+It collects `x_fixed`'s normalized output across the 30 trials, computes its standard deviation, and prints one line per batch size.
+
+It also plots the standard deviation against batch size.
+
+**Acceptance criteria:**
+
+- The standard deviation of `x_fixed`'s normalized output grows as batch size shrinks.
+
+**Example output:**
+
+```bash
+python run.py -w 7 -t 6
+```
+
+```text
+Batch size 64: std of BatchNorm1d(x_fixed) across 30 random batches = 0.1458
+Batch size 8: std of BatchNorm1d(x_fixed) across 30 random batches = 0.4098
+Batch size 2: std of BatchNorm1d(x_fixed) across 30 random batches = 0.8062
+```
+
+![w07_task06_batchnorm_batch_size.png](assets/w07_task06_batchnorm_batch_size.png "w07_task06_batchnorm_batch_size.png")
+
+<details>
+<summary>What is the limitation of BatchNorm?</summary>
+
+One example can affect another example's gradient.
+
+During training, examples share the batch mean and variance. Changing one example can change both the outputs and the input gradients of other examples.
+
+We can see that in the graph above: the same layer, the same fixed input, and yet its normalized output's standard deviation across repeated random batches is nearly six times higher at batch size 2 than at batch size 64, purely because of which other examples happened to share the batch.
+
+</details>
+
+LayerNorm can solve this. It normalizes each example using only that example's own features, never another example's.
+
+There is nothing batch-dependent to estimate or to fall back on, so the same computation applies unchanged whether the layer is training or evaluating.
+
+Read the paper that introduced LayerNorm: LayerNorm: Ba, Kiros, Hinton, ["Layer Normalization"](https://arxiv.org/abs/1607.06450), 2016.
+
+Let's create a `LayerNorm` layer and it receives two examples, each containing four features:
+
+$$
+X= \begin{bmatrix}
+1 & 1 & 5 & 5\\
+10 & 18 & 10 & 18
+\end{bmatrix}.
+$$
+
+<details>
+<summary>What is our first step?</summary>
+
+Layer normalization treats each example separately:
+
+- First example: $[1,1,5,5]$
+- Second example: $[10,18,10,18]$
+
+We calculate one mean and one variance **per row**, across its four features.
+
+For the first example:
+
+$$
+\mu_1=\frac{1+1+5+5}{4}=3.
+$$
+
+For the second:
+
+$$
+\mu_2=\frac{10+18+10+18}{4}=14.
+$$
+
+Subtract each example's mean from its features:
+
+$$
+X-\mu= \begin{bmatrix}
+-2 & -2 & 2 & 2\\
+-4 & 4 & -4 & 4
+\end{bmatrix}.
+$$
+
+Each row now has zero mean.
+
+</details>
+
+<details>
+<summary>What is our next setup?</summary>
+
+Calculate each example's **biased variance**, dividing by its number of features, $D=4$:
+
+$$
+v_1=\frac{(-2)^2+(-2)^2+2^2+2^2}{4}=4.
+$$
+
+$$
+v_2=\frac{(-4)^2+4^2+(-4)^2+4^2}{4}=16.
+$$
+
+Divide each centered row by its own standard deviation:
+
+$$
+\widehat{x}_{ij}
+= \frac{x_{ij}-\mu_i}{\sqrt{v_i+\varepsilon}}.
+$$
+
+Ignoring the tiny $\varepsilon$ for this calculation:
+
+$$
+\widehat{X}= \begin{bmatrix}
+-1 & -1 & 1 & 1\\
+-1 & 1 & -1 & 1
+\end{bmatrix}.
+$$
+
+Each row now has zero mean and unit variance.
+
+</details>
+
+<details>
+<summary>What is our next step?</summary>
+
+There is one learnable scale and shift **per feature**, shared across examples:
+
+$$
+y_{ij}=\gamma_j\widehat{x}_{ij}+\beta_j.
+$$
+
+Initially:
+
+$$
+\gamma=[1,1,1,1],
+\qquad
+\beta=[0,0,0,0].
+$$
+
+Suppose training later learns:
+
+$$
+\gamma=[2,2,0.5,0.5],
+\qquad
+\beta=[1,1,-1,-1].
+$$
+
+Our output becomes approximately:
+
+$$
+Y= \begin{bmatrix}
+-1 & -1 & -0.5 & -0.5\\
+-1 & 3 & -1.5 & -0.5
+\end{bmatrix}.
+$$
+
+The normalization statistics belong to each **example**, while the learnable parameters belong to each **feature**.
+
+</details>
+
+<details>
+<summary>What changes when we call <code>eval()</code>?</summary>
+
+Nothing in the layer's calculation.
+
+During both training and evaluation, LayerNorm uses each example's own feature mean and variance:
+
+$$
+y_{ij}
+= \gamma_j
+\frac{x_{ij}-\mu_i}{\sqrt{v_i+\varepsilon}}
++\beta_j.
+$$
+
+There are no running statistics or momentum updates.
+
+With the same input and parameters, training-mode and evaluation-mode outputs are identical.
+
+</details>
+
+During backpropagation gradients flow through each example's mean and variance, as well as through $\gamma$ and $\beta$.
+
+Let:
+
+$$
+g_{ij}=\frac{\partial\mathcal L}{\partial y_{ij}}.
+$$
+
+Because the learnable parameters are shared across examples:
+
+$$
+\frac{\partial\mathcal L}{\partial\beta_j}
+=\sum_i g_{ij},
+\qquad
+\frac{\partial\mathcal L}{\partial\gamma_j}
+=\sum_i g_{ij}\widehat{x}_{ij}.
+$$
+
+To calculate input gradients, first include each feature's scale:
+
+$$
+h_{ij}=g_{ij}\gamma_j.
+$$
+
+Then, for each example:
+
+$$
+\boxed{
+\frac{\partial\mathcal L}{\partial x_{ij}}
+= \frac{
+h_{ij}
+-\operatorname{mean}_j(h_{ij})
+-\widehat{x}_{ij}\operatorname{mean}_j(h_{ij}\widehat{x}_{ij})
+}{
+\sqrt{v_i+\varepsilon}
+}
+}
+$$
+
+Here, both means run across the features of that example.
+
+<details>
+<summary>Can one feature affect another feature's gradient?</summary>
+
+Yes. Features within an example share its mean and variance, so their gradients are connected.
+
+</details>
+
+<details>
+<summary>Can one example affect another example's gradient?</summary>
+
+No - layer normalization does not connect different examples.
+
+Each example's statistics are calculated independently, during both training and evaluation.
+
+</details>
+
+### Task 07
+
+**Description:**
+
+Task 06 showed that BatchNorm1d's output for one example depends on which other examples share its batch.
+LayerNorm solves this by normalizing each example independently of every other example in the batch.
+
+Define the `LayerNorm` class in `dl_lib.nn.normalization`, extending `Module`. It provides:
+
+- **construction**: takes `normalized_shape`, and a defaulting argument `eps=1e-5`. It creates a learnable `gamma` (initialized to ones) and `beta` (initialized to zeros), matching `normalized_shape`.
+- **forward**: normalizes each example along its feature dimension to zero mean and unit variance, using `eps` for numerical stability, then scales by `gamma` and shifts by `beta`. This computation does not depend on the `training` flag.
+- **parameters**: return only `gamma` and `beta`.
+
+Create a script that builds a `LayerNorm`, and prints an input alongside its training-mode and evaluation-mode outputs, together with whether the two are identical.
+The same script then reuses Task 06's exact fixed-example-with-random-companions experiment, this time normalizing with `LayerNorm` instead of `BatchNorm1d`, and plots its own standard-deviation-vs-batch-size graph so it can be compared side by side with Task 06's.
+
+**Acceptance criteria:**
+
+- The standard deviation of `x_fixed`'s normalized output is (numerically) zero at every batch size.
+
+**Test cases:**
+
+See `tests/test_dl_lib/test_nn/test_normalization.py`.
+
+**Example output:**
+
+```bash
+python run.py -w 7 -t 7
+```
+
+```text
+x = tensor([[ 4.0820,  0.4131, -3.3576,  2.1369],
+        [-1.1690, -1.7972,  1.8067,  2.6761],
+        [-0.4385,  0.1933, -0.1933,  1.3641]])
+Training:   layer_norm(x) = tensor([[ 1.1918, -0.1481, -1.5251,  0.4814],
+        [-0.8146, -1.1452,  0.7512,  1.2086],
+        [-0.9686, -0.0551, -0.6140,  1.6376]], grad_fn=<AddBackward0>)
+Evaluating: layer_norm(x) = tensor([[ 1.1918, -0.1481, -1.5251,  0.4814],
+        [-0.8146, -1.1452,  0.7512,  1.2086],
+        [-0.9686, -0.0551, -0.6140,  1.6376]], grad_fn=<AddBackward0>)
+Identical regardless of mode: True
+Batch size 64: std of LayerNorm(x_fixed) across 30 random batches = 0.0000
+Batch size 8: std of LayerNorm(x_fixed) across 30 random batches = 0.0000
+Batch size 2: std of LayerNorm(x_fixed) across 30 random batches = 0.0000
+```
+
+![w07_task07_layernorm_stable.png](assets/w07_task07_layernorm_stable.png "w07_task07_layernorm_stable.png")
+
+Where Task 06's `BatchNorm1d` showed a standard deviation growing to 0.8062 at batch size 2, `LayerNorm`'s output for the same fixed example never moves at all, regardless of its batchmates: it is a flat line at zero across all three batch sizes.
+
+### Task 08
+
+**Description:**
+
+This task closes the week with a single model report that puts Dropout, BatchNorm1d, and LayerNorm on the same footing, using the overfitting setup from Task 01.
+
+Create a script that trains four models on Task 01's 20-example dataset, and evaluates each on its 200-example test set:
+
+- a plain two-hidden-layer `Tanh` MLP (Task 01's baseline);
+- the same MLP with `Dropout(p=0.5)` after each hidden layer (Task 03);
+- the same MLP with `BatchNorm1d` before each hidden layer's `Tanh` (Task 05);
+- the same MLP with `LayerNorm` before each hidden layer's `Tanh` (Task 07).
+
+It computes each model's test-set $R^2$ against a mean-predictor baseline, prints a model report table with one row per model and a short comment, and names the best model.
+
+**Acceptance criteria:**
+
+- A draft model report is created.
+
+**Example output:**
+
+```bash
+python run.py -w 7 -t 8
+```
+
+```text
+model             test r2  comment
+baseline           0.0000  mean predictor, ignores x
+plain MLP          0.5319  no regularization, overfits the 20-example train set
++Dropout           0.1211  randomly zeroes activations, narrows the train/test gap
++BatchNorm1d       0.4549  normalizes over the batch, mainly a training stabilizer here
++LayerNorm         0.3401  normalizes per sample, stable even with this tiny batch
+Best model: plain MLP (test r2 = 0.5319)
+```
+
+### Task 09
+
+**Description:**
+
+Create a script that tries to beat Task 08's model report.
+
+**Acceptance criteria:**
+
+- A higher $R^2$ is obtained.
